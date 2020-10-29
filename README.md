@@ -1,2 +1,2 @@
 # ClauExplorer
-Using ClauParser/ClauParser, vztpv/ClauSciprt, and vztpv/ClauScriptShell (soon) ? 
+Using ClauParser/ClauParser, vztpv/ClauScript, and vztpv/ClauScriptShell (soon) ? 
