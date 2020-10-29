@@ -1,2 +1,2 @@
 # ClauExplorer
-Using ClauParser, and ClauLinq?
+Using ClauParser/ClauParser, vztpv/ClauSciprt, and vztpv/ClauScriptShell (soon) ? 
