@@ -1,2 +1,2 @@
 # ClauExplorer
-Using ClauParser/ClauParser, vztpv/ClauScript
+Using ClauParser/ClauParser, vztpv/ClauScript, and wxWidgets.
