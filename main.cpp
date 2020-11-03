@@ -376,29 +376,31 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 		que.pop();
 
 		// find non-@
-		long long ut_count = x.ut->GetUserTypeListSize() - 1;
-		long long it_count = x.ut->GetItemListSize() - 1;
-		long long count = x.ut->GetIListSize() - 1;
+		long long ut_count = 0;
+		long long it_count = 0;
+		long long count = 0;
 
 		//chk only @  ! - todo
-		for (long long i = x.ut->GetIListSize() - 1; i >= 0; --i) {
+		for (long long i = 0; i < x.ut->GetIListSize(); ++i) {
 			if (x.ut->IsItemList(i) && x.ut->GetItemList(it_count).GetName().ToString().empty()
 				&& wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@"sv)) {
-				x.global->AddItemAtFront("", x.ut->GetItemList(it_count).Get().ToString().substr(1));
-				it_count--;
+				x.global->AddItem("", x.ut->GetItemList(it_count).Get().ToString().substr(1));
+				it_count++;
 			}
 			else if (x.ut->IsItemList(i) && wiz::String::startsWith(x.ut->GetItemList(it_count).GetName().ToString(), "@"sv)) {
-				x.global->AddItemAtFront(
+				x.global->AddItem(
 					x.ut->GetItemList(it_count).GetName().ToString().substr(1),
 					x.ut->GetItemList(it_count).Get().ToString());
-				it_count--;
+				it_count++;
 			}
 			else if (x.ut->IsUserTypeList(i) && wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
-				x.global->LinkUserTypeAtFront(x.ut->GetUserTypeList(ut_count));
+				x.global->LinkUserType(x.ut->GetUserTypeList(ut_count));
 				x.ut->GetUserTypeList(ut_count)->SetName(x.ut->GetUserTypeList(ut_count)->GetName().ToString().substr(1));
 				x.ut->GetUserTypeList(ut_count) = nullptr;
+			
 				x.ut->RemoveUserTypeList(ut_count);
-				ut_count--;
+				count--;
+				i--;
 			}
 			else if (x.ut->IsUserTypeList(i) && !wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
 				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
@@ -417,16 +419,16 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 						}
 					}
 				}
-				ut_count--;
+				ut_count++;
 			}
 			else if(x.ut->IsUserTypeList(i)) {
-				ut_count--;
+				ut_count++;
 			}
 			else {
-				it_count--;
+				it_count++;
 			}
 
-			count--;
+			count++;
 		}
 	}
 
