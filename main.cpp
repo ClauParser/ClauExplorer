@@ -384,17 +384,17 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 		for (long long i = x.ut->GetIListSize() - 1; i >= 0; --i) {
 			if (x.ut->IsItemList(i) && x.ut->GetItemList(it_count).GetName().ToString().empty()
 				&& wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@"sv)) {
-				x.global->AddItemType(wiz::load_data::ItemType<WIZ_STRING_TYPE>("", x.ut->GetItemList(it_count).Get().ToString().substr(1)));
+				x.global->AddItemAtFront("", x.ut->GetItemList(it_count).Get().ToString().substr(1));
 				it_count--;
 			}
 			else if (x.ut->IsItemList(i) && wiz::String::startsWith(x.ut->GetItemList(it_count).GetName().ToString(), "@"sv)) {
-				x.global->AddItemType(wiz::load_data::ItemType<WIZ_STRING_TYPE>(
+				x.global->AddItemAtFront(
 					x.ut->GetItemList(it_count).GetName().ToString().substr(1),
-					x.ut->GetItemList(it_count).Get().ToString()));
+					x.ut->GetItemList(it_count).Get().ToString());
 				it_count--;
 			}
 			else if (x.ut->IsUserTypeList(i) && wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
-				x.global->LinkUserType(x.ut->GetUserTypeList(ut_count));
+				x.global->LinkUserTypeAtFront(x.ut->GetUserTypeList(ut_count));
 				x.ut->GetUserTypeList(ut_count)->SetName(x.ut->GetUserTypeList(ut_count)->GetName().ToString().substr(1));
 				x.ut->GetUserTypeList(ut_count) = nullptr;
 				x.ut->RemoveUserTypeList(ut_count);
