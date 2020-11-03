@@ -547,7 +547,7 @@ bool UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 		for (long long i = 0; i < x.ut->GetIListSize(); ++i) {
 			if (x.ut->IsItemList(i) && x.ut->GetItemList(it_count).GetName().ToString().empty()
 				&& wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@"sv)) {
-				x.global->GetItemList(it_count).Set(0, x.ut->GetItemList(it_count).Get());
+				//x.global->GetItemList(0).Set(0, x.ut->GetItemList(it_count).Get());
 			}
 			else if (x.ut->IsItemList(i) && wiz::String::startsWith(x.ut->GetItemList(it_count).GetName().ToString(), "@"sv)) {
 				x.global->SetItem(WIZ_STRING_TYPE(x.ut->GetItemList(it_count).GetName().ToString().substr(1)),
