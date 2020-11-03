@@ -1543,7 +1543,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	bSizer6 = new wxBoxSizer(wxVERTICAL);
 
 	m_code = new wxStyledTextCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, wxEmptyString);
-	m_code->SetText(wxT("Event = { id = main }"));
+	m_code->SetText(wxT("#ClauExplorer (https://github.com/ClauParser/ClauExplorer) \n#\t\tÁ¦ÀÛÀÚ vztpv@naver.com\n"));
 	m_code->SetUseTabs(true);
 	m_code->SetTabWidth(4);
 	m_code->SetIndent(4);
