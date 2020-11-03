@@ -41,36 +41,66 @@ class UtInfo {
 public:
 	wiz::load_data::UserType* global = nullptr;
 	wiz::load_data::UserType* ut;
+	std::string dir;
 	long long itCount = 0;
 	long long utCount = 0;
 	long long count = 0;
 public:
-	UtInfo(wiz::load_data::UserType*  global, wiz::load_data::UserType* ut, long long itCount = 0, long long utCount = 0)
-		: global(global), ut(ut), itCount(itCount), utCount(utCount), count(0)
+	UtInfo(wiz::load_data::UserType*  global, wiz::load_data::UserType* ut, const std::string& dir, long long itCount = 0, long long utCount = 0)
+		: global(global), ut(ut), itCount(itCount), utCount(utCount), count(0), dir(dir)
 	{
 		//
 	}
 };
 
 // for @insert, @update, @delete
-inline bool EqualFunc(const WIZ_STRING_TYPE& x , const WIZ_STRING_TYPE& y, bool no_any = false) {
+inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* eventUT, const wiz::load_data::ItemType<WIZ_STRING_TYPE>& x,
+	const wiz::load_data::ItemType<WIZ_STRING_TYPE>& y, long long x_idx, const std::string& dir) {
 
-	if (y == "%any"sv && !no_any) {
+	if (y.Get() == "%any"sv) {
 		return true;
 	}
-	
-	if (wiz::String::startsWith(y.ToString(), "%event_"sv)) {
-		// todo!
+
+	if (wiz::String::startsWith(y.Get().ToString(), "%event_"sv)) {
+		std::string event_id = y.Get().ToString().substr(7);
+
+		wiz::ClauText clautext;
+		wiz::ExecuteData executeData;
+		executeData.pEvents = eventUT;
+		wiz::Option option;
+
+		std::string statements;
+
+			// do not use NONE!(in user?)
+		statements += " Event = { id = NONE  ";
+		statements += " $call = { id = " + event_id + " ";
+		statements += " name = " + x.GetName().ToString() + " ";
+		statements += " value = " + y.Get().ToString() + " ";
+		statements += " is_user_type = FALSE ";
+		statements += " real_dir =  " + wiz::load_data::LoadData::GetRealDir(dir, global) + " ";
+		statements += " relative_dir = " + dir + " ";
+		statements += " idx = " + std::to_string(x_idx) + " "; // removal?
+		statements += " } ";
+
+		statements += " $return = { $return_value = { } }  ";
+		statements += " } ";
+		std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + statements, global, executeData, option, 1);
+		
+		if (result == "TRUE"sv) {
+			return true;
+		}
+		return false;
 	}
-	
-	return x == y;
+	return x.Get() == y.Get();
 }
 
 
-bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut) {
+bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
 	std::queue<UtInfo> que;
 
-	que.push(UtInfo(global, insert_ut));
+	std::string dir = "/.";
+
+	que.push(UtInfo(global, insert_ut, dir));
 
 	while (!que.empty()) {
 		UtInfo x = que.front();
@@ -85,7 +115,7 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 			if (x.ut->IsItemList(i) && x.ut->GetItemList(it_count).GetName().ToString().empty()
 				&& !wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@"sv)) {
 				// chk exist all case of value?
-				auto item = x.global->GetItem("");
+				auto item = x.global->GetItemIdx("");
 				// no exist -> return false;
 				if (item.empty()) {
 					// LOG....
@@ -94,7 +124,8 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				bool pass = false;
 				for (long long j = 0; j < item.size(); ++j) {
-					if (EqualFunc(item[j].Get(), x.ut->GetItemList(it_count).Get())) {
+					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j], 
+						x.dir + "/$it" + std::to_string(item[j]))) {
 						pass = true;
 						break;
 					}
@@ -105,7 +136,7 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 			}
 			else if (x.ut->IsItemList(i) && !x.ut->GetItemList(it_count).GetName().ToString().empty() && !wiz::String::startsWith(x.ut->GetItemList(it_count).GetName().ToString(), "@"sv)) {
 				// chk exist all case of value?
-				auto item = x.global->GetItem(x.ut->GetItemList(it_count).GetName().ToString());
+				auto item = x.global->GetItemIdx(x.ut->GetItemList(it_count).GetName().ToString());
 				// no exist -> return false;
 				if (item.empty()) {
 					// LOG....
@@ -115,7 +146,8 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				bool pass = false;
 
 				for (long long j = 0; j < item.size(); ++j) {
-					if (EqualFunc(item[j].Get(), x.ut->GetItemList(it_count).Get())) {
+					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j], 
+						x.dir + "/$it" + std::to_string(item[j]))) {
 						pass = true;
 						break;
 					}
@@ -134,7 +166,7 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 					continue;
 				}
 
-				auto usertype = x.global->GetUserTypeItem(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
+				auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
 
 				if (usertype.empty()) {
 					return false;
@@ -144,7 +176,8 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				count++;
 
 				for (long long j = 0; j < usertype.size(); ++j) {
-					que.push(UtInfo(usertype[j], x.ut->GetUserTypeList(ut_count - 1)));
+					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1), 
+						x.dir + "/$ut" + std::to_string(usertype[j])));
 				}
 
 				continue;
@@ -163,10 +196,10 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 	return true;
 }
 
-bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut) {
+bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
 	std::queue<UtInfo> que;
-
-	que.push(UtInfo(global, insert_ut));
+	std::string dir = "/.";
+	que.push(UtInfo(global, insert_ut, dir));
 
 	while (!que.empty()) {
 		UtInfo x = que.front();
@@ -181,7 +214,7 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 			if (x.ut->IsItemList(i) && x.ut->GetItemList(it_count).GetName().ToString().empty()
 				&& !wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@"sv)) {
 				// chk exist all case of value?
-				auto item = x.global->GetItem("");
+				auto item = x.global->GetItemIdx("");
 				// no exist -> return false;
 				if (item.empty()) {
 					// LOG....
@@ -190,7 +223,8 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				bool pass = false;
 				for (long long j = 0; j < item.size(); ++j) {
-					if (EqualFunc(item[j].Get(), x.ut->GetItemList(it_count).Get())) {
+					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
+						x.dir + "/$it" + std::to_string(item[j]))) {
 						pass = true;
 						break;
 					}
@@ -201,7 +235,7 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 			}
 			else if (x.ut->IsItemList(i) && !x.ut->GetItemList(it_count).GetName().ToString().empty() && !wiz::String::startsWith(x.ut->GetItemList(it_count).GetName().ToString(), "@"sv)) {
 				// chk exist all case of value?
-				auto item = x.global->GetItem(x.ut->GetItemList(it_count).GetName().ToString());
+				auto item = x.global->GetItemIdx(x.ut->GetItemList(it_count).GetName().ToString());
 				// no exist -> return false;
 				if (item.empty()) {
 					// LOG....
@@ -211,7 +245,8 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				bool pass = false;
 
 				for (long long j = 0; j < item.size(); ++j) {
-					if (EqualFunc(item[j].Get(), x.ut->GetItemList(it_count).Get())) {
+					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
+						x.dir + "/$it" + std::to_string(item[j]))) {
 						pass = true;
 						break;
 					}
@@ -230,7 +265,7 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 					continue;
 				}
 
-				auto usertype = x.global->GetUserTypeItem(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
+				auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
 
 				if (usertype.empty()) {
 					return false;
@@ -240,7 +275,8 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				count++;
 
 				for (long long j = 0; j < usertype.size(); ++j) {
-					que.push(UtInfo(usertype[j], x.ut->GetUserTypeList(ut_count - 1)));
+					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1), 
+						x.dir + "/$ut" + std::to_string(usertype[j])));
 				}
 
 				continue;
@@ -263,10 +299,10 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 }
 
 
-bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut) {
+bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
 	std::queue<UtInfo> que;
-
-	que.push(UtInfo(global, insert_ut));
+	std::string dir = "/.";
+	que.push(UtInfo(global, insert_ut, dir));
 
 	while (!que.empty()) {
 		UtInfo x = que.front();
@@ -282,7 +318,7 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 			if (x.ut->IsItemList(i) && x.ut->GetItemList(it_count).GetName().ToString().empty()
 				&& !wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@"sv)) {
 				// chk exist all case of value?
-				auto item = x.global->GetItem("");
+				auto item = x.global->GetItemIdx("");
 				// no exist -> return false;
 				if (item.empty()) {
 					// LOG....
@@ -291,7 +327,8 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				bool pass = false;
 				for (long long j = 0; j < item.size(); ++j) {
-					if (EqualFunc(item[j].Get(), x.ut->GetItemList(it_count).Get())) {
+					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j], 
+						x.dir + "$it" + std::to_string(item[j]))) {
 						pass = true;
 						break;
 					}
@@ -302,7 +339,7 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 			}
 			else if (x.ut->IsItemList(i) && !x.ut->GetItemList(it_count).GetName().ToString().empty() && !wiz::String::startsWith(x.ut->GetItemList(it_count).GetName().ToString(), "@"sv)) {
 				// chk exist all case of value?
-				auto item = x.global->GetItem(x.ut->GetItemList(it_count).GetName().ToString());
+				auto item = x.global->GetItemIdx(x.ut->GetItemList(it_count).GetName().ToString());
 				// no exist -> return false;
 				if (item.empty()) {
 					// LOG....
@@ -312,7 +349,8 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				bool pass = false;
 
 				for (long long j = 0; j < item.size(); ++j) {
-					if (EqualFunc(item[j].Get(), x.ut->GetItemList(it_count).Get())) {
+					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
+						dir+ "/$it" + std::to_string(item[j]))) {
 						pass = true;
 						break;
 					}
@@ -331,7 +369,7 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 					continue;
 				}
 
-				auto usertype = x.global->GetUserTypeItem(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
+				auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
 
 				if (usertype.empty()) {
 					return false;
@@ -341,7 +379,8 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				count++;
 
 				for (long long j = 0; j < usertype.size(); ++j) {
-					que.push(UtInfo(usertype[j], x.ut->GetUserTypeList(ut_count - 1)));
+					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1), 
+						dir + "$ut" + std::to_string(usertype[j])));
 				}
 
 				continue;
@@ -362,14 +401,14 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 // starts with '@' -> insert target
 // else -> condition target.
-bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut) {
-	if (!_InsertFunc(global, insert_ut)) {
+bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
+	if (!_InsertFunc(global, insert_ut, eventUT)) {
 		return false;
 	}
-	
+	std::string dir = "/.";
 	std::queue<UtInfo> que;
 	// insert
-	que.push(UtInfo(global, insert_ut));
+	que.push(UtInfo(global, insert_ut, dir));
 
 	while (!que.empty()) {
 		UtInfo x = que.front();
@@ -384,13 +423,67 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 		for (long long i = 0; i < x.ut->GetIListSize(); ++i) {
 			if (x.ut->IsItemList(i) && x.ut->GetItemList(it_count).GetName().ToString().empty()
 				&& wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@"sv)) {
-				x.global->AddItem("", x.ut->GetItemList(it_count).Get().ToString().substr(1));
+
+				if (wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@%event_"sv)) {
+					std::string event_id = x.ut->GetItemList(it_count).Get().ToString().substr(8);
+
+					wiz::ClauText clautext;
+					wiz::ExecuteData executeData;
+					executeData.pEvents = insert_ut->GetParent();
+					wiz::Option option;
+
+					std::string statements;
+
+					// do not use NONE!(in user?)
+					statements += " Event = { id = NONE  ";
+					statements += " $call = { id = " + event_id + " ";
+					statements += " name = EMPTY_STRING ";
+					statements += " is_user_type = FALSE ";
+					statements += " } ";
+
+					statements += " $return = { $return_value = { } }  ";
+					statements += " } ";
+					std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + statements, x.global, executeData, option, 1);
+
+					x.global->AddItem("", result);
+				}
+				else {
+					x.global->AddItem("", x.ut->GetItemList(it_count).Get().ToString().substr(1));
+				}
+
 				it_count++;
 			}
 			else if (x.ut->IsItemList(i) && wiz::String::startsWith(x.ut->GetItemList(it_count).GetName().ToString(), "@"sv)) {
-				x.global->AddItem(
-					x.ut->GetItemList(it_count).GetName().ToString().substr(1),
-					x.ut->GetItemList(it_count).Get().ToString());
+				if (wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "%event_"sv)) {
+					std::string event_id = x.ut->GetItemList(it_count).Get().ToString().substr(7);
+
+					wiz::ClauText clautext;
+					wiz::ExecuteData executeData;
+					executeData.pEvents = insert_ut->GetParent();
+					wiz::Option option;
+
+					std::string statements;
+
+					// do not use NONE!(in user?)
+					statements += " Event = { id = NONE  ";
+					statements += " $call = { id = " + event_id + " ";
+					statements += " name = EMPTY_STRING ";
+					statements += " is_user_type = FALSE ";
+					statements += " } ";
+
+					statements += " $return = { $return_value = { } }  ";
+					statements += " } ";
+					std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + statements, x.global, executeData, option, 1);
+
+					x.global->AddItem(
+						x.ut->GetItemList(it_count).GetName().ToString().substr(1),
+						result);
+				}
+				else {
+					x.global->AddItem(
+						x.ut->GetItemList(it_count).GetName().ToString().substr(1),
+						x.ut->GetItemList(it_count).Get().ToString());
+				}
 				it_count++;
 			}
 			else if (x.ut->IsUserTypeList(i) && wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
@@ -405,17 +498,20 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 			else if (x.ut->IsUserTypeList(i) && !wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
 				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
 					for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
-						if (_InsertFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count))) {
-							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count)));
+						if (_InsertFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
+							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count)
+							, x.dir + "/$ut" + std::to_string(j)
+							));
 						}
 					}
 				}
 				else {
-					auto usertype = x.global->GetUserTypeItem(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
+					auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
 
 					for (long long j = 0; j < usertype.size(); ++j) {
-						if (_InsertFunc(usertype[j], x.ut->GetUserTypeList(ut_count))) {
-							que.push(UtInfo(usertype[j], x.ut->GetUserTypeList(ut_count)));
+						if (_InsertFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
+							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), 
+								x.dir + "/$ut" + std::to_string(usertype[j])));
 						}
 					}
 				}
@@ -435,14 +531,14 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 	return true;
 }
 
-bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut) {
-	if (!_RemoveFunc(global, insert_ut)) {
+bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
+	if (!_RemoveFunc(global, insert_ut, eventUT)) {
 		return false;
 	}
-
+	std::string dir = "/.";
 	std::queue<UtInfo> que;
 	// insert
-	que.push(UtInfo(global, insert_ut));
+	que.push(UtInfo(global, insert_ut, dir));
 
 	while (!que.empty()) {
 		UtInfo x = que.front();
@@ -457,9 +553,55 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 		for (long long i = x.ut->GetIListSize() - 1; i >= 0; --i) {
 			if (x.ut->IsItemList(i) && x.ut->GetItemList(it_count).GetName().ToString().empty()
 				&& wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@"sv)) {
-				
-				x.global->RemoveItemList("", x.ut->GetItemList(it_count).Get().ToString().substr(1));
 
+				if (wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@%event_"sv)) {
+					std::string event_id = x.ut->GetItemList(it_count).Get().ToString().substr(8);
+
+					wiz::ClauText clautext;
+					wiz::ExecuteData executeData;
+					executeData.pEvents = insert_ut->GetParent();
+					wiz::Option option;
+
+					wiz::load_data::UserType callUT;
+					std::string statements;
+
+					statements += " Event = { id = NONE  ";
+					statements += " $call = { id = " + event_id + " ";
+					statements += " name = _name  ";
+					statements += " value = _value ";
+					statements += " is_user_type = FALSE ";
+					statements += " real_dir =  _real_dir "; //+wiz::load_data::LoadData::GetRealDir(dir, global) + " ";
+					statements += " relative_dir = _dir "; // +dir + " ";
+					statements += " idx = _idx "; // +std::to_string(x_idx) + " "; // removal?
+					statements += " } ";
+
+					statements += " $return = { $return_value = { } }  ";
+					statements += " } ";
+
+					wiz::load_data::LoadData::LoadDataFromString(statements, callUT);
+
+					auto temp = x.global->GetItemIdx("");
+
+					for (long long j = 0; j < temp.size(); ++j) {
+						auto callInfo = wiz::load_data::UserType::Find(&callUT, "/./Event/$call");
+
+						callInfo.second[0]->SetItem("name", "$NO_NAME");
+						callInfo.second[0]->SetItem("value", x.global->GetItemList(temp[j]).Get());
+						callInfo.second[0]->SetItem("real_dir", wiz::load_data::LoadData::GetRealDir(x.dir, x.global));
+						callInfo.second[0]->SetItem("relative_dir", x.dir);
+						callInfo.second[0]->SetItem("idx", std::to_string(temp[j]));
+
+						std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global,
+							executeData, option, 1);
+
+						if (result == x.ut->GetItemList(it_count).Get().ToString().substr(1)) {
+							x.global->RemoveItemList(temp[j]);
+						}
+					}
+				}
+				else {
+					x.global->RemoveItemList("", x.ut->GetItemList(it_count).Get().ToString().substr(1));
+				}
 				it_count--;
 				//x.global->AddItemType(wiz::load_data::ItemType<WIZ_STRING_TYPE>("", x.ut->GetItemList(it_count).Get().ToString().substr(1)));
 			}
@@ -467,15 +609,75 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 				//x.global->AddItemType(wiz::load_data::ItemType<WIZ_STRING_TYPE>(
 				//	x.ut->GetItemList(it_count).GetName().ToString().substr(1),
 				//	x.ut->GetItemList(it_count).Get().ToString()));
-				x.global->RemoveItemList(x.ut->GetItemList(it_count).GetName().ToString().substr(1), x.ut->GetItemList(it_count).Get().ToString());
-			
+				if (wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "%event_"sv)) {
+					std::string event_id = x.ut->GetItemList(it_count).Get().ToString().substr(7);
+
+					wiz::ClauText clautext;
+					wiz::ExecuteData executeData;
+					executeData.pEvents = insert_ut->GetParent();
+					wiz::Option option;
+					wiz::load_data::UserType callUT;
+					std::string statements;
+
+					statements += " Event = { id = NONE  ";
+					statements += " $call = { id = " + event_id + " ";
+					statements += " name = _name  ";
+					statements += " value = _value ";
+					statements += " is_user_type = FALSE ";
+					statements += " real_dir =  _real_dir "; //+wiz::load_data::LoadData::GetRealDir(dir, global) + " ";
+					statements += " relative_dir = _dir "; // +dir + " ";
+					statements += " idx = _idx "; // +std::to_string(x_idx) + " "; // removal?
+					statements += " } ";
+
+					statements += " $return = { $return_value = { } }  ";
+					statements += " } ";
+
+					wiz::load_data::LoadData::LoadDataFromString(statements, callUT);
+
+					auto name = x.ut->GetItemList(it_count).GetName().ToString().substr(1);
+					auto temp = x.global->GetItemIdx(name);
+
+					if (wiz::String::startsWith(name, "&"sv) && name.size() >= 2) {
+						long long idx = std::stoll(name.substr(1));
+
+						if (idx < 0 || idx >= x.global->GetItemListSize()) { // .size()) {
+							return false;
+						}
+						auto valName = x.ut->GetItemList(it_count).Get().ToString();
+
+						if (x.global->GetItemList(idx).Get() == valName || valName == "%any"sv) {
+							x.global->RemoveItemList(idx);
+						}
+					}
+					else {
+						for (long long j = 0; j < temp.size(); ++j) {
+							auto callInfo = wiz::load_data::UserType::Find(&callUT, "/./Event/$call");
+
+							callInfo.second[0]->SetItem("name", name);
+							callInfo.second[0]->SetItem("value", x.global->GetItemList(temp[j]).Get());
+							callInfo.second[0]->SetItem("real_dir", wiz::load_data::LoadData::GetRealDir(x.dir, x.global));
+							callInfo.second[0]->SetItem("relative_dir", x.dir);
+							callInfo.second[0]->SetItem("idx", std::to_string(temp[j]));
+
+							std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global,
+								executeData, option, 1);
+
+							if (result == x.ut->GetItemList(it_count).Get()) {
+								x.global->RemoveItemList(temp[j]);
+							}
+						}
+					}
+				}
+				else {
+					x.global->RemoveItemList(x.ut->GetItemList(it_count).GetName().ToString().substr(1), x.ut->GetItemList(it_count).Get().ToString());
+				}
 
 				it_count--;
 			}
 			else if (x.ut->IsUserTypeList(i) && wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
 				if (x.ut->GetUserTypeList(ut_count)->GetName() == "@$"sv) {
 					for (long long j = x.global->GetUserTypeListSize() - 1; j >= 0; --j) {
-						if (_RemoveFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count))) {
+						if (_RemoveFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
 							delete[] x.global->GetUserTypeList(j);
 							x.global->GetUserTypeList(j) = nullptr;
 							x.global->RemoveUserTypeList(j);
@@ -486,7 +688,7 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 					auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString().substr(1));
 
 					for (long long j = usertype.size() - 1; j >= 0; --j) {
-						if (_RemoveFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count))) {
+						if (_RemoveFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
 							x.global->RemoveUserTypeList(usertype[j]);
 						}
 					}
@@ -496,17 +698,18 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 			else if (x.ut->IsUserTypeList(i) && false == wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
 				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
 					for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
-						if (_RemoveFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count))) {
-							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count)));
+						if (_RemoveFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
+							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), x.dir + "/$ut" + std::to_string(j)));
 						}
 					}
 				}
 				else {
-					auto usertype = x.global->GetUserTypeItem(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
+					auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
 
 					for (long long j = 0; j < usertype.size(); ++j) {
-						if (_RemoveFunc(usertype[j], x.ut->GetUserTypeList(ut_count))) {
-							que.push(UtInfo(usertype[j], x.ut->GetUserTypeList(ut_count)));
+						if (_RemoveFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
+							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), 
+								x.dir + "/$ut" + std::to_string(usertype[j]) ));
 						}
 					}
 				}
@@ -527,14 +730,14 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 	return true;
 }
 
-bool UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut) {
-	if (!_UpdateFunc(global, insert_ut)) {
+bool UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
+	if (!_UpdateFunc(global, insert_ut, eventUT)) {
 		return false;
 	}
-
+	std::string dir = "/.";
 	std::queue<UtInfo> que;
 	// insert
-	que.push(UtInfo(global, insert_ut));
+	que.push(UtInfo(global, insert_ut, dir));
 
 	while (!que.empty()) {
 		UtInfo x = que.front();
@@ -549,26 +752,103 @@ bool UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 		for (long long i = 0; i < x.ut->GetIListSize(); ++i) {
 			if (x.ut->IsItemList(i) && x.ut->GetItemList(it_count).GetName().ToString().empty()
 				&& wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "@"sv)) {
+				// think @&0 = 3 # 0 <- index, 3 <- value.
 				//x.global->GetItemList(0).Set(0, x.ut->GetItemList(it_count).Get());
 			}
 			else if (x.ut->IsItemList(i) && wiz::String::startsWith(x.ut->GetItemList(it_count).GetName().ToString(), "@"sv)) {
-				x.global->SetItem(WIZ_STRING_TYPE(x.ut->GetItemList(it_count).GetName().ToString().substr(1)),
-					x.ut->GetItemList(it_count).Get());
-			}
-			else if (x.ut->IsUserTypeList(i) && !wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
-				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
-					for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
-						if (_UpdateFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count))) {
-							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count)));
+				if (wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "%event_"sv)) {
+					std::string event_id = x.ut->GetItemList(it_count).Get().ToString().substr(7);
+					
+					wiz::ClauText clautext;
+					wiz::ExecuteData executeData;
+					executeData.pEvents = insert_ut->GetParent();
+					wiz::Option option;
+					
+					wiz::load_data::UserType callUT;
+					std::string statements;
+
+					statements += " Event = { id = NONE  ";
+					statements += " $call = { id = " + event_id + " ";
+					statements += " name = _name  ";
+					statements += " value = _value ";
+					statements += " is_user_type = FALSE ";
+					statements += " real_dir =  _real_dir "; //+wiz::load_data::LoadData::GetRealDir(dir, global) + " ";
+					statements += " relative_dir = _dir "; // +dir + " ";
+					statements += " idx = _idx "; // +std::to_string(x_idx) + " "; // removal?
+					statements += " } ";
+
+					statements += " $return = { $return_value = { } }  ";
+					statements += " } ";
+
+					wiz::load_data::LoadData::LoadDataFromString(statements, callUT);
+
+					auto temp = wiz::load_data::UserType::Find(&callUT, "/./Event/$call").second[0];
+					
+					std::string name = x.ut->GetItemList(it_count).GetName().ToString().substr(1);
+					auto position = x.global->GetItemIdx(name);
+					
+					{
+						std::string name = x.ut->GetItemList(it_count).GetName().ToString().substr(1);
+						if (wiz::String::startsWith(name, "&"sv) && name.size() >= 2) {
+							long long idx = std::stoll(name.substr(1));
+							if (idx < 0 || idx >= x.global->GetItemListSize()) {
+								return false; // error
+							}
+							else {
+								position.clear();
+								position.push_back(idx);
+							}
+						}
+
+
+						for (long long j = 0; j < position.size(); ++j) {
+
+							temp->SetItem("name", x.ut->GetItemList(it_count).GetName().ToString().substr(1));
+							temp->SetItem("value", x.global->GetItemList(position[j]).Get());
+							temp->SetItem("relative_dir", x.dir);
+							temp->SetItem("real_dir", wiz::load_data::LoadData::GetRealDir(x.dir, x.global));
+							temp->SetItem("idx", std::to_string(x.global->GetIlistIndex(position[j], 1)));
+
+							std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global, executeData, option, 1);
+
+							x.global->GetItemList(position[j]).Set(0, result);
+
 						}
 					}
 				}
 				else {
-					auto usertype = x.global->GetUserTypeItem(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
+					std::string name = x.ut->GetItemList(it_count).GetName().ToString().substr(1);
+					if (wiz::String::startsWith(name, "&"sv) && name.size() >= 2) {
+						long long idx = std::stoll(name.substr(1));
+						if (idx < 0 || idx >= x.global->GetItemListSize()) {
+							return false;
+						}
+						auto value = x.ut->GetItemList(it_count).Get();
+						x.global->GetItemList(idx).Set(0, value);
+						return true;
+					}
+					else {
+						x.global->SetItem(WIZ_STRING_TYPE(x.ut->GetItemList(it_count).GetName().ToString().substr(1)),
+							x.ut->GetItemList(it_count).Get());
+					}
+				}
+			}
+			else if (x.ut->IsUserTypeList(i) && !wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
+				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
+					for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
+						if (_UpdateFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
+							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count),
+								x.dir + "/$ut" + std::to_string(j)));
+						}
+					}
+				}
+				else {
+					auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
 
 					for (long long j = 0; j < usertype.size(); ++j) {
-						if (_UpdateFunc(usertype[j], x.ut->GetUserTypeList(ut_count))) {
-							que.push(UtInfo(usertype[j], x.ut->GetUserTypeList(ut_count)));
+						if (_UpdateFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
+							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), 
+								x.dir + "/$ut" + std::to_string(usertype[j])));
 						}
 					}
 				}
@@ -1383,13 +1663,13 @@ protected:
 		string mainStr = "Main = { $call = { id = main } }";
 		string eventStr(m_code->GetValue().ToUTF8());
 		wiz::load_data::UserType eventUT;
-		wiz::ExecuteData executeData;
+		//wiz::ExecuteData executeData;
 
 		wiz::load_data::LoadData::LoadDataFromString(eventStr, eventUT);
 
-		executeData.pEvents = &eventUT;
-		executeData.noUseInput = true;
-		executeData.noUseOutput = true;
+		//executeData.pEvents = &eventUT;
+		//executeData.noUseInput = true;
+		//executeData.noUseOutput = true;
 
 		try {
 			wiz::Option opt;
@@ -1397,13 +1677,13 @@ protected:
 
 			for (long long i = 0; i < eventUT.GetUserTypeListSize(); ++i) {
 				if (eventUT.GetUserTypeList(i)->GetName() == "$insert"sv) {
-					::InsertFunc(now, eventUT.GetUserTypeList(i));
+					::InsertFunc(now, eventUT.GetUserTypeList(i), &eventUT);
 				}
 				else if (eventUT.GetUserTypeList(i)->GetName() == "$update"sv) {
-					::UpdateFunc(now, eventUT.GetUserTypeList(i));
+					::UpdateFunc(now, eventUT.GetUserTypeList(i), &eventUT);
 				}
 				else if (eventUT.GetUserTypeList(i)->GetName() == "$delete"sv) {
-					::RemoveFunc(now, eventUT.GetUserTypeList(i));
+					::RemoveFunc(now, eventUT.GetUserTypeList(i), &eventUT);
 				}
 			}
 			//wiz::ClauText().excute_module(mainStr, now, executeData, opt, 0);
