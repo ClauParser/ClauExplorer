@@ -84,7 +84,7 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 
 		statements += " $return = { $return_value = { } }  ";
 		statements += " } ";
-		std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + statements, global, executeData, option, 1);
+		std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + statements, global, executeData, option, 1);
 		
 		if (result == "TRUE"sv) {
 			return true;
@@ -125,7 +125,7 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				bool pass = false;
 				for (long long j = 0; j < item.size(); ++j) {
 					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j], 
-						x.dir + "/$it" + std::to_string(item[j]))) {
+						x.dir)) {
 						pass = true;
 						break;
 					}
@@ -147,7 +147,7 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				for (long long j = 0; j < item.size(); ++j) {
 					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j], 
-						x.dir + "/$it" + std::to_string(item[j]))) {
+						x.dir )) {
 						pass = true;
 						break;
 					}
@@ -177,7 +177,7 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				for (long long j = 0; j < usertype.size(); ++j) {
 					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1), 
-						x.dir + "/$ut" + std::to_string(usertype[j])));
+						x.dir));
 				}
 
 				continue;
@@ -224,7 +224,7 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				bool pass = false;
 				for (long long j = 0; j < item.size(); ++j) {
 					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
-						x.dir + "/$it" + std::to_string(item[j]))) {
+						x.dir )) {
 						pass = true;
 						break;
 					}
@@ -246,7 +246,7 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				for (long long j = 0; j < item.size(); ++j) {
 					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
-						x.dir + "/$it" + std::to_string(item[j]))) {
+						x.dir )) {
 						pass = true;
 						break;
 					}
@@ -328,7 +328,7 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				bool pass = false;
 				for (long long j = 0; j < item.size(); ++j) {
 					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j], 
-						x.dir + "$it" + std::to_string(item[j]))) {
+						x.dir )) {
 						pass = true;
 						break;
 					}
@@ -350,7 +350,7 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				for (long long j = 0; j < item.size(); ++j) {
 					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
-						dir+ "/$it" + std::to_string(item[j]))) {
+						dir)) {
 						pass = true;
 						break;
 					}
@@ -443,7 +443,7 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 
 					statements += " $return = { $return_value = { } }  ";
 					statements += " } ";
-					std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + statements, x.global, executeData, option, 1);
+					std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + statements, x.global, executeData, option, 1);
 
 					x.global->AddItem("", result);
 				}
@@ -473,7 +473,7 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 
 					statements += " $return = { $return_value = { } }  ";
 					statements += " } ";
-					std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + statements, x.global, executeData, option, 1);
+					std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + statements, x.global, executeData, option, 1);
 
 					x.global->AddItem(
 						x.ut->GetItemList(it_count).GetName().ToString().substr(1),
@@ -591,7 +591,7 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 						callInfo.second[0]->SetItem("relative_dir", x.dir);
 						callInfo.second[0]->SetItem("idx", std::to_string(temp[j]));
 
-						std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global,
+						std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global,
 							executeData, option, 1);
 
 						if (result == x.ut->GetItemList(it_count).Get().ToString().substr(1)) {
@@ -659,7 +659,7 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 							callInfo.second[0]->SetItem("relative_dir", x.dir);
 							callInfo.second[0]->SetItem("idx", std::to_string(temp[j]));
 
-							std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global,
+							std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global,
 								executeData, option, 1);
 
 							if (result == x.ut->GetItemList(it_count).Get()) {
@@ -809,7 +809,7 @@ bool UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 							temp->SetItem("real_dir", wiz::load_data::LoadData::GetRealDir(x.dir, x.global));
 							temp->SetItem("idx", std::to_string(x.global->GetIlistIndex(position[j], 1)));
 
-							std::string result = clautext.excute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global, executeData, option, 1);
+							std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global, executeData, option, 1);
 
 							x.global->GetItemList(position[j]).Set(0, result);
 
@@ -1686,7 +1686,7 @@ protected:
 					::RemoveFunc(now, eventUT.GetUserTypeList(i), &eventUT);
 				}
 			}
-			//wiz::ClauText().excute_module(mainStr, now, executeData, opt, 0);
+			//wiz::ClauText().execute_module(mainStr, now, executeData, opt, 0);
 
 			RefreshTable(now);
 		}
