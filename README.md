@@ -1,7 +1,7 @@
 # ClauExplorer
 Using ClauParser/ClauParser, vztpv/ClauScript, and wxWidgets.
 
-![alt text]("지우기 테스트.png") 
+![alt text]("test.png") 
 
 # Usage
 	# line comment, insert..
