@@ -594,7 +594,7 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 						std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global,
 							executeData, option, 1);
 
-						if (result == x.ut->GetItemList(it_count).Get().ToString().substr(1)) {
+						if (result == "TRUE"sv) { //x.ut->GetItemList(it_count).Get().ToString().substr(1)) {
 							x.global->RemoveItemList(temp[j]);
 						}
 					}
@@ -645,7 +645,18 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 						}
 						auto valName = x.ut->GetItemList(it_count).Get().ToString();
 
-						if (x.global->GetItemList(idx).Get() == valName || valName == "%any"sv) {
+						auto callInfo = wiz::load_data::UserType::Find(&callUT, "/./Event/$call");
+
+						callInfo.second[0]->SetItem("name", name);
+						callInfo.second[0]->SetItem("value", x.global->GetItemList(idx).Get());
+						callInfo.second[0]->SetItem("real_dir", wiz::load_data::LoadData::GetRealDir(x.dir, x.global));
+						callInfo.second[0]->SetItem("relative_dir", x.dir);
+						callInfo.second[0]->SetItem("idx", std::to_string(idx));
+
+						std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global,
+							executeData, option, 1);
+
+						if (result == "TRUE"sv) {
 							x.global->RemoveItemList(idx);
 						}
 					}
@@ -662,7 +673,7 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 							std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + callUT.ToString(), x.global,
 								executeData, option, 1);
 
-							if (result == x.ut->GetItemList(it_count).Get()) {
+							if (result == "TRUE"sv) {
 								x.global->RemoveItemList(temp[j]);
 							}
 						}
