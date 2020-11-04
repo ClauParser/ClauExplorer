@@ -1,9 +1,9 @@
 # ClauExplorer
 Using ClauParser/ClauParser, vztpv/ClauScript, and wxWidgets.
 
-![alt text]("test.png") 
+![alt text](test.png) 
 
-# Usage
+# Usage 
 	# line comment, insert..
 	$insert = {
 		@x = 1 
