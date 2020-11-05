@@ -986,7 +986,8 @@ private:
 
 	int dataViewListCtrlNo = -1;
 	int position = -1;
-
+	
+	std::vector<std::string> dir_vec;
 private:
 	void RefreshTable(wiz::load_data::UserType* now)
 	{
@@ -1240,6 +1241,30 @@ protected:
 	wxDataViewListCtrl* m_dataViewListCtrl4;
 	wxStatusBar* m_statusBar1;
 
+	void EnterDir(const std::string& name) {
+		dir_vec.push_back(name);
+
+		std::string dir = "/.";
+		for (int i = 0; i < dir_vec.size(); ++i) {
+			dir += "/";
+			dir += dir_vec[i];
+		}
+
+		dir_text->ChangeValue(wxString::FromUTF8(dir.c_str()));
+	}
+	void BackDir() {
+		if (!dir_vec.empty()) {
+			dir_vec.pop_back();
+			
+			std::string dir = "/.";
+			for (int i = 0; i < dir_vec.size(); ++i) {
+				dir += "/";
+				dir += dir_vec[i];
+			}
+
+			dir_text->ChangeValue(wxString::FromUTF8(dir.c_str()));
+		}
+	}
 	// Virtual event handlers, overide them in your derived class
 	virtual void FileLoadMenuOnMenuSelection(wxCommandEvent& event) {
 		if (!isMain) { return; }
@@ -1362,6 +1387,7 @@ protected:
 		if (now && now->GetParent()) {
 			RefreshTable(now->GetParent());
 			now = now->GetParent();
+			BackDir();
 		}
 	}
 	virtual void dir_textOnTextEnter(wxCommandEvent& event) {
@@ -1394,17 +1420,20 @@ protected:
 		else if (1 == view_mode && NK_ENTER == event.GetKeyCode() && position >= 0 && position < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position);
 			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
 		}
 		else  if (2 == view_mode && NK_ENTER == event.GetKeyCode() && position >= 0 && position < m_dataViewListCtrl1->GetItemCount()) {
 			if (now->IsUserTypeList(position)) {
 				const int idx = now->GetUserTypeIndexFromIlistIndex(position);
 				now = now->GetUserTypeList(idx);
 				RefreshTable(now);
+				EnterDir(now->GetName().ToString());
 			}
 		}
 		else if (NK_BACKSPACE == event.GetKeyCode() && now->GetParent() != nullptr) {
 			now = now->GetParent();
 			RefreshTable(now);
+			BackDir();
 		}
 		else {
 			wxDataViewListCtrl* ctrl[4];
@@ -1455,6 +1484,7 @@ protected:
 		else if (1 == view_mode && NK_ENTER == event.GetKeyCode() && dataViewListCtrlNo == 1 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
 			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
 		}
 		else  if (2 == view_mode && NK_ENTER == event.GetKeyCode() && position >= 0 && position < m_dataViewListCtrl2->GetItemCount()) {
 			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
@@ -1462,11 +1492,13 @@ protected:
 				const int idx = now->GetUserTypeIndexFromIlistIndex(pos);
 				now = now->GetUserTypeList(idx);
 				RefreshTable(now);
+				EnterDir(now->GetName().ToString());
 			}
 		}
 		else if (NK_BACKSPACE == event.GetKeyCode() && now->GetParent() != nullptr) {
 			now = now->GetParent();
 			RefreshTable(now);
+			BackDir();
 		}
 		else {
 			wxDataViewListCtrl* ctrl[4];
@@ -1518,6 +1550,7 @@ protected:
 		else if (1 == view_mode && NK_ENTER == event.GetKeyCode() && dataViewListCtrlNo == 2 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
 			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
 		}
 		else  if (2 == view_mode && NK_ENTER == event.GetKeyCode() && position >= 0 && position < m_dataViewListCtrl3->GetItemCount()) {
 			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
@@ -1525,11 +1558,13 @@ protected:
 				const int idx = now->GetUserTypeIndexFromIlistIndex(pos);
 				now = now->GetUserTypeList(idx);
 				RefreshTable(now);
+				EnterDir(now->GetName().ToString());
 			}
 		}
 		else if (NK_BACKSPACE == event.GetKeyCode() && now->GetParent() != nullptr) {
 			now = now->GetParent();
 			RefreshTable(now);
+			BackDir();
 		}
 		else {
 			wxDataViewListCtrl* ctrl[4];
@@ -1580,6 +1615,7 @@ protected:
 		else if (1 == view_mode && NK_ENTER == event.GetKeyCode() && dataViewListCtrlNo == 3 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
 			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
 		}
 		else  if (2 == view_mode && NK_ENTER == event.GetKeyCode() && position >= 0 && position < m_dataViewListCtrl4->GetItemCount()) {
 			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
@@ -1587,11 +1623,13 @@ protected:
 				const int idx = now->GetUserTypeIndexFromIlistIndex(pos);
 				now = now->GetUserTypeList(idx);
 				RefreshTable(now);
+				EnterDir(now->GetName().ToString());
 			}
 		}
 		else if (NK_BACKSPACE == event.GetKeyCode() && now->GetParent() != nullptr) {
 			now = now->GetParent();
 			RefreshTable(now);
+			BackDir();
 		}
 		else {
 			wxDataViewListCtrl* ctrl[4];
@@ -1632,12 +1670,14 @@ protected:
 		if (1 == view_mode && position >= 0 && position < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position);
 			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
 		}
 		else  if (2 == view_mode && position >= 0 && position < m_dataViewListCtrl1->GetItemCount()) {
 			if (now->IsUserTypeList(position)) {
 				const int idx = now->GetUserTypeIndexFromIlistIndex(position);
 				now = now->GetUserTypeList(idx);
 				RefreshTable(now);
+				EnterDir(now->GetName().ToString());
 			}
 		}
 		event.Skip();
@@ -1647,6 +1687,7 @@ protected:
 		if (1 == view_mode && dataViewListCtrlNo == 1 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
 			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
 		}
 		else  if (2 == view_mode && position >= 0 && position < m_dataViewListCtrl2->GetItemCount()) {
 			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
@@ -1654,6 +1695,7 @@ protected:
 				const int idx = now->GetUserTypeIndexFromIlistIndex(pos);
 				now = now->GetUserTypeList(idx);
 				RefreshTable(now);
+				EnterDir(now->GetName().ToString());
 			}
 		}
 	}
@@ -1662,6 +1704,7 @@ protected:
 		if (1 == view_mode && dataViewListCtrlNo == 2 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
 			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
 		}
 		else  if (2 == view_mode && position >= 0 && position < m_dataViewListCtrl3->GetItemCount()) {
 			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
@@ -1669,6 +1712,7 @@ protected:
 				const int idx = now->GetUserTypeIndexFromIlistIndex(pos);
 				now = now->GetUserTypeList(idx);
 				RefreshTable(now);
+				EnterDir(now->GetName().ToString());
 			}
 		}
 	}
@@ -1677,6 +1721,7 @@ protected:
 		if (1 == view_mode && dataViewListCtrlNo == 3 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
 			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
 		}
 		else  if (2 == view_mode && position >= 0 && position < m_dataViewListCtrl4->GetItemCount()) {
 			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
@@ -1684,6 +1729,8 @@ protected:
 				const int idx = now->GetUserTypeIndexFromIlistIndex(pos);
 				now = now->GetUserTypeList(idx);
 				RefreshTable(now);
+
+				EnterDir(now->GetName().ToString());
 			}
 		}
 	}
@@ -1692,24 +1739,28 @@ protected:
 		if (now->GetParent()) {
 			now = now->GetParent();
 			RefreshTable(now);
+			BackDir();
 		}
 	}
 	virtual void m_dataViewListCtrl2OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
 		if (now->GetParent()) {
 			now = now->GetParent();
 			RefreshTable(now);
+			BackDir();
 		}
 	}
 	virtual void m_dataViewListCtrl3OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
 		if (now->GetParent()) {
 			now = now->GetParent();
 			RefreshTable(now);
+			BackDir();
 		}
 	}
 	virtual void m_dataViewListCtrl4OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
 		if (now->GetParent()) {
 			now = now->GetParent();
 			RefreshTable(now);
+			BackDir();
 		}
 	}
 
@@ -1914,6 +1965,8 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	bSizer2->Add(back_button, 0, wxALL, 5);
 
 	dir_text = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	dir_text->Enable(false);
+
 	bSizer2->Add(dir_text, 1, wxALL, 5);
 
 	refresh_button = new wxButton(this, wxID_ANY, wxT("Refresh"), wxDefaultPosition, wxDefaultSize, 0);
@@ -1976,7 +2029,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	m_code->MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL, wxSTC_MARK_EMPTY);
 	m_code->SetSelBackground(true, wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT));
 	m_code->SetSelForeground(true, wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHTTEXT));
-	bSizer6->Add(m_code, 7, wxEXPAND | wxALL, 5);
+	bSizer6->Add(m_code, 9, wxEXPAND | wxALL, 5);
 
 	//m_code->Hide();
 
