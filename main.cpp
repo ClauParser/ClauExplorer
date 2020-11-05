@@ -46,7 +46,7 @@ public:
 	long long utCount = 0;
 	long long count = 0;
 public:
-	UtInfo(wiz::load_data::UserType*  global, wiz::load_data::UserType* ut, const std::string& dir, long long itCount = 0, long long utCount = 0)
+	UtInfo(wiz::load_data::UserType* global, wiz::load_data::UserType* ut, const std::string& dir, long long itCount = 0, long long utCount = 0)
 		: global(global), ut(ut), itCount(itCount), utCount(utCount), count(0), dir(dir)
 	{
 		//
@@ -71,7 +71,7 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 
 		std::string statements;
 
-			// do not use NONE!(in user?)
+		// do not use NONE!(in user?)
 		statements += " Event = { id = NONE  ";
 		statements += " $call = { id = " + event_id + " ";
 		statements += " name = " + x.GetName().ToString() + " ";
@@ -85,7 +85,7 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 		statements += " $return = { $return_value = { } }  ";
 		statements += " } ";
 		std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + statements, global, executeData, option, 1);
-		
+
 		if (result == "TRUE"sv) {
 			return true;
 		}
@@ -124,7 +124,7 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				bool pass = false;
 				for (long long j = 0; j < item.size(); ++j) {
-					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j], 
+					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
 						x.dir)) {
 						pass = true;
 						break;
@@ -146,8 +146,8 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				bool pass = false;
 
 				for (long long j = 0; j < item.size(); ++j) {
-					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j], 
-						x.dir )) {
+					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
+						x.dir)) {
 						pass = true;
 						break;
 					}
@@ -176,7 +176,7 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				count++;
 
 				for (long long j = 0; j < usertype.size(); ++j) {
-					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1), 
+					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1),
 						x.dir));
 				}
 
@@ -224,7 +224,7 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				bool pass = false;
 				for (long long j = 0; j < item.size(); ++j) {
 					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
-						x.dir )) {
+						x.dir)) {
 						pass = true;
 						break;
 					}
@@ -246,7 +246,7 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				for (long long j = 0; j < item.size(); ++j) {
 					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
-						x.dir )) {
+						x.dir)) {
 						pass = true;
 						break;
 					}
@@ -275,7 +275,7 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				count++;
 
 				for (long long j = 0; j < usertype.size(); ++j) {
-					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1), 
+					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1),
 						x.dir + "/$ut" + std::to_string(usertype[j])));
 				}
 
@@ -327,8 +327,8 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 				bool pass = false;
 				for (long long j = 0; j < item.size(); ++j) {
-					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j], 
-						x.dir )) {
+					if (EqualFunc(x.global, eventUT, x.global->GetItemList(item[j]), x.ut->GetItemList(it_count), item[j],
+						x.dir)) {
 						pass = true;
 						break;
 					}
@@ -379,7 +379,7 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 				count++;
 
 				for (long long j = 0; j < usertype.size(); ++j) {
-					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1), 
+					que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count - 1),
 						dir + "$ut" + std::to_string(usertype[j])));
 				}
 
@@ -490,7 +490,7 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 				x.global->LinkUserType(x.ut->GetUserTypeList(ut_count));
 				x.ut->GetUserTypeList(ut_count)->SetName(x.ut->GetUserTypeList(ut_count)->GetName().ToString().substr(1));
 				x.ut->GetUserTypeList(ut_count) = nullptr;
-			
+
 				x.ut->RemoveUserTypeList(ut_count);
 				count--;
 				i--;
@@ -500,7 +500,7 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 					for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
 						if (_InsertFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
 							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count)
-							, x.dir + "/$ut" + std::to_string(j)
+								, x.dir + "/$ut" + std::to_string(j)
 							));
 						}
 					}
@@ -510,14 +510,14 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 
 					for (long long j = 0; j < usertype.size(); ++j) {
 						if (_InsertFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
-							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), 
+							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count),
 								x.dir + "/$ut" + std::to_string(usertype[j])));
 						}
 					}
 				}
 				ut_count++;
 			}
-			else if(x.ut->IsUserTypeList(i)) {
+			else if (x.ut->IsUserTypeList(i)) {
 				ut_count++;
 			}
 			else {
@@ -545,7 +545,7 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 		que.pop();
 
 		// find non-@
-		long long ut_count = x.ut->GetUserTypeListSize() -1;
+		long long ut_count = x.ut->GetUserTypeListSize() - 1;
 		long long it_count = x.ut->GetItemListSize() - 1;
 		long long count = x.ut->GetIListSize() - 1;
 
@@ -719,8 +719,8 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 
 					for (long long j = 0; j < usertype.size(); ++j) {
 						if (_RemoveFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
-							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), 
-								x.dir + "/$ut" + std::to_string(usertype[j]) ));
+							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count),
+								x.dir + "/$ut" + std::to_string(usertype[j])));
 						}
 					}
 				}
@@ -769,12 +769,12 @@ bool UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 			else if (x.ut->IsItemList(i) && wiz::String::startsWith(x.ut->GetItemList(it_count).GetName().ToString(), "@"sv)) {
 				if (wiz::String::startsWith(x.ut->GetItemList(it_count).Get().ToString(), "%event_"sv)) {
 					std::string event_id = x.ut->GetItemList(it_count).Get().ToString().substr(7);
-					
+
 					wiz::ClauText clautext;
 					wiz::ExecuteData executeData;
 					executeData.pEvents = insert_ut->GetParent();
 					wiz::Option option;
-					
+
 					wiz::load_data::UserType callUT;
 					std::string statements;
 
@@ -794,10 +794,10 @@ bool UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 					wiz::load_data::LoadData::LoadDataFromString(statements, callUT);
 
 					auto temp = wiz::load_data::UserType::Find(&callUT, "/./Event/$call").second[0];
-					
+
 					std::string name = x.ut->GetItemList(it_count).GetName().ToString().substr(1);
 					auto position = x.global->GetItemIdx(name);
-					
+
 					{
 						std::string name = x.ut->GetItemList(it_count).GetName().ToString().substr(1);
 						if (wiz::String::startsWith(name, "&"sv) && name.size() >= 2) {
@@ -858,7 +858,7 @@ bool UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 
 					for (long long j = 0; j < usertype.size(); ++j) {
 						if (_UpdateFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
-							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), 
+							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count),
 								x.dir + "/$ut" + std::to_string(usertype[j])));
 						}
 					}
@@ -986,7 +986,7 @@ private:
 
 	int dataViewListCtrlNo = -1;
 	int position = -1;
-	
+
 	std::vector<std::string> dir_vec;
 private:
 	void RefreshTable(wiz::load_data::UserType* now)
@@ -1255,7 +1255,7 @@ protected:
 	void BackDir() {
 		if (!dir_vec.empty()) {
 			dir_vec.pop_back();
-			
+
 			std::string dir = "/.";
 			for (int i = 0; i < dir_vec.size(); ++i) {
 				dir += "/";
@@ -1389,13 +1389,6 @@ protected:
 			now = now->GetParent();
 			BackDir();
 		}
-	}
-	virtual void dir_textOnTextEnter(wxCommandEvent& event) {
-
-		wiz::load_data::UserType* ut;
-
-		// todo
-
 	}
 	virtual void refresh_buttonOnButtonClick(wxCommandEvent& event) {
 		if (now) {
@@ -1664,7 +1657,7 @@ protected:
 		}
 	}
 
-	virtual void m_dataViewListCtrl1OnDataViewListCtrlItemActivated(wxMouseEvent& event) {
+	virtual void m_dataViewListCtrl1OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
 		dataViewListCtrlNo = 0; position = m_dataViewListCtrl1->GetSelectedRow();
 
 		if (1 == view_mode && position >= 0 && position < now->GetUserTypeListSize()) {
@@ -1680,9 +1673,8 @@ protected:
 				EnterDir(now->GetName().ToString());
 			}
 		}
-		event.Skip();
 	}
-	virtual void m_dataViewListCtrl2OnDataViewListCtrlItemActivated(wxMouseEvent& event) {
+	virtual void m_dataViewListCtrl2OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
 		dataViewListCtrlNo = 1; position = m_dataViewListCtrl2->GetSelectedRow();
 		if (1 == view_mode && dataViewListCtrlNo == 1 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
@@ -1699,7 +1691,7 @@ protected:
 			}
 		}
 	}
-	virtual void m_dataViewListCtrl3OnDataViewListCtrlItemActivated(wxMouseEvent& event) {
+	virtual void m_dataViewListCtrl3OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
 		dataViewListCtrlNo = 2; position = m_dataViewListCtrl3->GetSelectedRow();
 		if (1 == view_mode && dataViewListCtrlNo == 2 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
@@ -1716,7 +1708,7 @@ protected:
 			}
 		}
 	}
-	virtual void m_dataViewListCtrl4OnDataViewListCtrlItemActivated(wxMouseEvent& event) {
+	virtual void m_dataViewListCtrl4OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
 		dataViewListCtrlNo = 3; position = m_dataViewListCtrl4->GetSelectedRow();
 		if (1 == view_mode && dataViewListCtrlNo == 3 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
@@ -1781,22 +1773,26 @@ protected:
 		dataViewListCtrlNo = 3;
 		position = m_dataViewListCtrl4->GetSelectedRow();
 	}
-	
-	virtual void m_dataViewListCtrl1OnSize(wxUpdateUIEvent& event) {
+
+	virtual void m_dataViewListCtrl1OnSize(wxSizeEvent& event) {
 		m_dataViewListCtrl1->GetColumn(0)->SetWidth(m_dataViewListCtrl1->GetSize().GetWidth() / 2 * 0.92); // check...
 		m_dataViewListCtrl1->GetColumn(1)->SetWidth(m_dataViewListCtrl1->GetSize().GetWidth() / 2 * 0.92);
+		event.Skip();
 	}
-	virtual void m_dataViewListCtrl2OnSize(wxUpdateUIEvent& event) {
+	virtual void m_dataViewListCtrl2OnSize(wxSizeEvent& event) {
 		m_dataViewListCtrl2->GetColumn(0)->SetWidth(m_dataViewListCtrl2->GetSize().GetWidth() / 2 * 0.92); // check...
 		m_dataViewListCtrl2->GetColumn(1)->SetWidth(m_dataViewListCtrl2->GetSize().GetWidth() / 2 * 0.92);
-	}	
-	virtual void m_dataViewListCtrl3OnSize(wxUpdateUIEvent& event) {
+		event.Skip();
+	}
+	virtual void m_dataViewListCtrl3OnSize(wxSizeEvent& event) {
 		m_dataViewListCtrl3->GetColumn(0)->SetWidth(m_dataViewListCtrl3->GetSize().GetWidth() / 2 * 0.92); // check...
 		m_dataViewListCtrl3->GetColumn(1)->SetWidth(m_dataViewListCtrl3->GetSize().GetWidth() / 2 * 0.92);
-	}	
-	virtual void m_dataViewListCtrl4OnSize(wxUpdateUIEvent& event) {
+		event.Skip();
+	}
+	virtual void m_dataViewListCtrl4OnSize(wxSizeEvent& event) {
 		m_dataViewListCtrl4->GetColumn(0)->SetWidth(m_dataViewListCtrl4->GetSize().GetWidth() / 2 * 0.92); // check...
 		m_dataViewListCtrl4->GetColumn(1)->SetWidth(m_dataViewListCtrl4->GetSize().GetWidth() / 2 * 0.92);
+		event.Skip();
 	}
 
 	virtual void DefaultViewMenuOnMenuSelection(wxCommandEvent& event) {
@@ -2078,14 +2074,13 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	this->Connect(IListViewMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::IListViewMenuOnMenuSelection));
 
 	back_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::back_buttonOnButtonClick), NULL, this);
-	dir_text->Connect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::dir_textOnTextEnter), NULL, this);
 	refresh_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::refresh_buttonOnButtonClick), NULL, this);
 
 
-	m_dataViewListCtrl1->Connect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl1OnSize), NULL, this );
-	m_dataViewListCtrl2->Connect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl2OnSize), NULL, this);
-	m_dataViewListCtrl3->Connect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl3OnSize), NULL, this);
-	m_dataViewListCtrl4->Connect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl4OnSize), NULL, this);
+	m_dataViewListCtrl1->Connect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl1OnSize), NULL, this);
+	m_dataViewListCtrl2->Connect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl2OnSize), NULL, this);
+	m_dataViewListCtrl3->Connect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl3OnSize), NULL, this);
+	m_dataViewListCtrl4->Connect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl4OnSize), NULL, this);
 
 	m_dataViewListCtrl1->Connect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl1OnChar), NULL, this);
 	m_dataViewListCtrl2->Connect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl2OnChar), NULL, this);
@@ -2093,10 +2088,10 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	m_dataViewListCtrl4->Connect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl4OnChar), NULL, this);
 
 	// double click
-	m_dataViewListCtrl1->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemActivated), NULL, this);
-	m_dataViewListCtrl2->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlItemActivated), NULL, this);
-	m_dataViewListCtrl3->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlItemActivated), NULL, this);
-	m_dataViewListCtrl4->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl1->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl2->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl3->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl4->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemActivated), NULL, this);
 
 	// right click
 	m_dataViewListCtrl1->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemContextMenu), NULL, this);
@@ -2125,16 +2120,15 @@ MainFrame::~MainFrame()
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::RemoveMenuOnMenuSelection));
 
 	back_button->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::back_buttonOnButtonClick), NULL, this);
-	dir_text->Disconnect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::dir_textOnTextEnter), NULL, this);
 	refresh_button->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::refresh_buttonOnButtonClick), NULL, this);
 
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::DefaultViewMenuOnMenuSelection));
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::IListViewMenuOnMenuSelection));
 
-	m_dataViewListCtrl1->Disconnect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl1OnSize), NULL, this);
-	m_dataViewListCtrl2->Disconnect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl2OnSize), NULL, this);
-	m_dataViewListCtrl3->Disconnect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl3OnSize), NULL, this);
-	m_dataViewListCtrl4->Disconnect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl4OnSize), NULL, this);
+	m_dataViewListCtrl1->Disconnect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl1OnSize), NULL, this);
+	m_dataViewListCtrl2->Disconnect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl2OnSize), NULL, this);
+	m_dataViewListCtrl3->Disconnect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl3OnSize), NULL, this);
+	m_dataViewListCtrl4->Disconnect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl4OnSize), NULL, this);
 
 
 	m_dataViewListCtrl1->Disconnect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl1OnChar), NULL, this);
@@ -2142,10 +2136,10 @@ MainFrame::~MainFrame()
 	m_dataViewListCtrl3->Disconnect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl3OnChar), NULL, this);
 	m_dataViewListCtrl4->Disconnect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl4OnChar), NULL, this);
 
-	m_dataViewListCtrl1->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemActivated), NULL, this);
-	m_dataViewListCtrl2->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlItemActivated), NULL, this);
-	m_dataViewListCtrl3->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlItemActivated), NULL, this);
-	m_dataViewListCtrl4->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl1->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl2->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl3->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl4->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemActivated), NULL, this);
 
 	m_dataViewListCtrl1->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemContextMenu), NULL, this);
 	m_dataViewListCtrl2->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlItemContextMenu), NULL, this);
