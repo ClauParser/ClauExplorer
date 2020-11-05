@@ -1626,6 +1626,94 @@ protected:
 		}
 	}
 
+	virtual void m_dataViewListCtrl1OnDataViewListCtrlItemActivated(wxMouseEvent& event) {
+		dataViewListCtrlNo = 0; position = m_dataViewListCtrl1->GetSelectedRow();
+
+		if (1 == view_mode && position >= 0 && position < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeList(position);
+			RefreshTable(now);
+		}
+		else  if (2 == view_mode && position >= 0 && position < m_dataViewListCtrl1->GetItemCount()) {
+			if (now->IsUserTypeList(position)) {
+				const int idx = now->GetUserTypeIndexFromIlistIndex(position);
+				now = now->GetUserTypeList(idx);
+				RefreshTable(now);
+			}
+		}
+		event.Skip();
+	}
+	virtual void m_dataViewListCtrl2OnDataViewListCtrlItemActivated(wxMouseEvent& event) {
+		dataViewListCtrlNo = 1; position = m_dataViewListCtrl2->GetSelectedRow();
+		if (1 == view_mode && dataViewListCtrlNo == 1 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
+			RefreshTable(now);
+		}
+		else  if (2 == view_mode && position >= 0 && position < m_dataViewListCtrl2->GetItemCount()) {
+			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
+			if (now->IsUserTypeList(pos)) {
+				const int idx = now->GetUserTypeIndexFromIlistIndex(pos);
+				now = now->GetUserTypeList(idx);
+				RefreshTable(now);
+			}
+		}
+	}
+	virtual void m_dataViewListCtrl3OnDataViewListCtrlItemActivated(wxMouseEvent& event) {
+		dataViewListCtrlNo = 2; position = m_dataViewListCtrl3->GetSelectedRow();
+		if (1 == view_mode && dataViewListCtrlNo == 2 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2 < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
+			RefreshTable(now);
+		}
+		else  if (2 == view_mode && position >= 0 && position < m_dataViewListCtrl3->GetItemCount()) {
+			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
+			if (now->IsUserTypeList(pos)) {
+				const int idx = now->GetUserTypeIndexFromIlistIndex(pos);
+				now = now->GetUserTypeList(idx);
+				RefreshTable(now);
+			}
+		}
+	}
+	virtual void m_dataViewListCtrl4OnDataViewListCtrlItemActivated(wxMouseEvent& event) {
+		dataViewListCtrlNo = 3; position = m_dataViewListCtrl4->GetSelectedRow();
+		if (1 == view_mode && dataViewListCtrlNo == 3 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3 < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
+			RefreshTable(now);
+		}
+		else  if (2 == view_mode && position >= 0 && position < m_dataViewListCtrl4->GetItemCount()) {
+			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
+			if (now->IsUserTypeList(pos)) {
+				const int idx = now->GetUserTypeIndexFromIlistIndex(pos);
+				now = now->GetUserTypeList(idx);
+				RefreshTable(now);
+			}
+		}
+	}
+
+	virtual void m_dataViewListCtrl1OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
+		if (now->GetParent()) {
+			now = now->GetParent();
+			RefreshTable(now);
+		}
+	}
+	virtual void m_dataViewListCtrl2OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
+		if (now->GetParent()) {
+			now = now->GetParent();
+			RefreshTable(now);
+		}
+	}
+	virtual void m_dataViewListCtrl3OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
+		if (now->GetParent()) {
+			now = now->GetParent();
+			RefreshTable(now);
+		}
+	}
+	virtual void m_dataViewListCtrl4OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
+		if (now->GetParent()) {
+			now = now->GetParent();
+			RefreshTable(now);
+		}
+	}
+
+
 	virtual void m_dataViewListCtrl1OnDataViewListCtrlSelectionChanged(wxDataViewEvent& event) {
 		dataViewListCtrlNo = 0;
 		position = m_dataViewListCtrl1->GetSelectedRow();
@@ -1641,6 +1729,23 @@ protected:
 	virtual void m_dataViewListCtrl4OnDataViewListCtrlSelectionChanged(wxDataViewEvent& event) {
 		dataViewListCtrlNo = 3;
 		position = m_dataViewListCtrl4->GetSelectedRow();
+	}
+	
+	virtual void m_dataViewListCtrl1OnSize(wxUpdateUIEvent& event) {
+		m_dataViewListCtrl1->GetColumn(0)->SetWidth(m_dataViewListCtrl1->GetSize().GetWidth() / 2 * 0.92); // check...
+		m_dataViewListCtrl1->GetColumn(1)->SetWidth(m_dataViewListCtrl1->GetSize().GetWidth() / 2 * 0.92);
+	}
+	virtual void m_dataViewListCtrl2OnSize(wxUpdateUIEvent& event) {
+		m_dataViewListCtrl2->GetColumn(0)->SetWidth(m_dataViewListCtrl2->GetSize().GetWidth() / 2 * 0.92); // check...
+		m_dataViewListCtrl2->GetColumn(1)->SetWidth(m_dataViewListCtrl2->GetSize().GetWidth() / 2 * 0.92);
+	}	
+	virtual void m_dataViewListCtrl3OnSize(wxUpdateUIEvent& event) {
+		m_dataViewListCtrl3->GetColumn(0)->SetWidth(m_dataViewListCtrl3->GetSize().GetWidth() / 2 * 0.92); // check...
+		m_dataViewListCtrl3->GetColumn(1)->SetWidth(m_dataViewListCtrl3->GetSize().GetWidth() / 2 * 0.92);
+	}	
+	virtual void m_dataViewListCtrl4OnSize(wxUpdateUIEvent& event) {
+		m_dataViewListCtrl4->GetColumn(0)->SetWidth(m_dataViewListCtrl4->GetSize().GetWidth() / 2 * 0.92); // check...
+		m_dataViewListCtrl4->GetColumn(1)->SetWidth(m_dataViewListCtrl4->GetSize().GetWidth() / 2 * 0.92);
 	}
 
 	virtual void DefaultViewMenuOnMenuSelection(wxCommandEvent& event) {
@@ -1820,16 +1925,16 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer(wxHORIZONTAL);
 
-	m_dataViewListCtrl1 = new wxDataViewListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0);
+	m_dataViewListCtrl1 = new wxDataViewListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_HORIZ_RULES | wxDV_ROW_LINES | wxDV_SINGLE);
 	bSizer3->Add(m_dataViewListCtrl1, 1, wxALL | wxEXPAND, 5);
 
-	m_dataViewListCtrl2 = new wxDataViewListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0);
+	m_dataViewListCtrl2 = new wxDataViewListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_HORIZ_RULES | wxDV_ROW_LINES | wxDV_SINGLE);
 	bSizer3->Add(m_dataViewListCtrl2, 1, wxALL | wxEXPAND, 5);
 
-	m_dataViewListCtrl3 = new wxDataViewListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0);
+	m_dataViewListCtrl3 = new wxDataViewListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_HORIZ_RULES | wxDV_ROW_LINES | wxDV_SINGLE);
 	bSizer3->Add(m_dataViewListCtrl3, 1, wxALL | wxEXPAND, 5);
 
-	m_dataViewListCtrl4 = new wxDataViewListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0);
+	m_dataViewListCtrl4 = new wxDataViewListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_HORIZ_RULES | wxDV_ROW_LINES | wxDV_SINGLE);
 	bSizer3->Add(m_dataViewListCtrl4, 1, wxALL | wxEXPAND, 5);
 
 	wxBoxSizer* bSizer6;
@@ -1923,10 +2028,28 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	dir_text->Connect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::dir_textOnTextEnter), NULL, this);
 	refresh_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::refresh_buttonOnButtonClick), NULL, this);
 
+
+	m_dataViewListCtrl1->Connect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl1OnSize), NULL, this );
+	m_dataViewListCtrl2->Connect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl2OnSize), NULL, this);
+	m_dataViewListCtrl3->Connect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl3OnSize), NULL, this);
+	m_dataViewListCtrl4->Connect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl4OnSize), NULL, this);
+
 	m_dataViewListCtrl1->Connect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl1OnChar), NULL, this);
 	m_dataViewListCtrl2->Connect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl2OnChar), NULL, this);
 	m_dataViewListCtrl3->Connect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl3OnChar), NULL, this);
 	m_dataViewListCtrl4->Connect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl4OnChar), NULL, this);
+
+	// double click
+	m_dataViewListCtrl1->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl2->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl3->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl4->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemActivated), NULL, this);
+
+	// right click
+	m_dataViewListCtrl1->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemContextMenu), NULL, this);
+	m_dataViewListCtrl2->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlItemContextMenu), NULL, this);
+	m_dataViewListCtrl3->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlItemContextMenu), NULL, this);
+	m_dataViewListCtrl4->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemContextMenu), NULL, this);
 
 	m_dataViewListCtrl1->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlSelectionChanged), NULL, this);
 	m_dataViewListCtrl2->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlSelectionChanged), NULL, this);
@@ -1955,10 +2078,27 @@ MainFrame::~MainFrame()
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::DefaultViewMenuOnMenuSelection));
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::IListViewMenuOnMenuSelection));
 
+	m_dataViewListCtrl1->Disconnect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl1OnSize), NULL, this);
+	m_dataViewListCtrl2->Disconnect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl2OnSize), NULL, this);
+	m_dataViewListCtrl3->Disconnect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl3OnSize), NULL, this);
+	m_dataViewListCtrl4->Disconnect(wxEVT_SIZE, wxUpdateUIEventHandler(MainFrame::m_dataViewListCtrl4OnSize), NULL, this);
+
+
 	m_dataViewListCtrl1->Disconnect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl1OnChar), NULL, this);
 	m_dataViewListCtrl2->Disconnect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl2OnChar), NULL, this);
 	m_dataViewListCtrl3->Disconnect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl3OnChar), NULL, this);
 	m_dataViewListCtrl4->Disconnect(wxEVT_CHAR, wxKeyEventHandler(MainFrame::m_dataViewListCtrl4OnChar), NULL, this);
+
+	m_dataViewListCtrl1->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl2->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl3->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlItemActivated), NULL, this);
+	m_dataViewListCtrl4->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, wxMouseEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemActivated), NULL, this);
+
+	m_dataViewListCtrl1->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlItemContextMenu), NULL, this);
+	m_dataViewListCtrl2->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlItemContextMenu), NULL, this);
+	m_dataViewListCtrl3->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlItemContextMenu), NULL, this);
+	m_dataViewListCtrl4->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemContextMenu), NULL, this);
+
 
 	m_dataViewListCtrl1->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlSelectionChanged), NULL, this);
 	m_dataViewListCtrl2->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlSelectionChanged), NULL, this);
