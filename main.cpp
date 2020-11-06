@@ -1477,8 +1477,10 @@ protected:
 	}
 	virtual void FileExitMenuOnMenuSelection(wxCommandEvent& event) { Close(true); }
 	virtual void InsertMenuOnMenuSelection(wxCommandEvent& event) {
-		if (*changed) { changedEvent();
-			return;
+		if (!isMain) { return; }
+		
+		if (*changed) { 
+			changedEvent();
 		}
 
 		if (1 == view_mode || 3 == view_mode) { return; }
@@ -1507,6 +1509,8 @@ protected:
 		}
 	}
 	virtual void ChangeMenuOnMenuSelection(wxCommandEvent& event) {
+		if (!isMain) { return; }
+
 		if (*changed) { changedEvent();
 			return;
 		}
@@ -1540,6 +1544,8 @@ protected:
 		}
 	}
 	virtual void RemoveMenuOnMenuSelection(wxCommandEvent& event) {
+		if (!isMain) { return; }
+		
 		if (*changed) { changedEvent();
 			return;
 		}
@@ -1573,6 +1579,7 @@ protected:
 	virtual void back_buttonOnButtonClick(wxCommandEvent& event) {
 		if (*changed) {
 			changedEvent();
+			if (!isMain) { return; }
 		}
 		if (now && now->GetParent()) {
 			RefreshTable(now->GetParent());
@@ -1583,6 +1590,7 @@ protected:
 	virtual void refresh_buttonOnButtonClick(wxCommandEvent& event) {
 		if (*changed) {
 			changedEvent();
+			if (!isMain) { return; }
 		}
 
 		if (now) {
@@ -1600,7 +1608,7 @@ protected:
 
 	virtual void m_dataViewListCtrl1OnChar(wxKeyEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 0; position = m_dataViewListCtrl1->GetSelectedRow();
 		if (WXK_ESCAPE == event.GetKeyCode()) {
@@ -1672,7 +1680,7 @@ protected:
 	}
 	virtual void m_dataViewListCtrl2OnChar(wxKeyEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 1; position = m_dataViewListCtrl2->GetSelectedRow();
 		if (WXK_ESCAPE == event.GetKeyCode()) {
@@ -1746,7 +1754,7 @@ protected:
 	}
 	virtual void m_dataViewListCtrl3OnChar(wxKeyEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 2; position = m_dataViewListCtrl3->GetSelectedRow();
 		if (WXK_ESCAPE == event.GetKeyCode()) {
@@ -1819,7 +1827,7 @@ protected:
 	}
 	virtual void m_dataViewListCtrl4OnChar(wxKeyEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 3; position = m_dataViewListCtrl4->GetSelectedRow();
 		if (WXK_ESCAPE == event.GetKeyCode()) {
@@ -1894,7 +1902,7 @@ protected:
 	// double click.
 	virtual void m_dataViewListCtrl1OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 0; position = m_dataViewListCtrl1->GetSelectedRow();
 
@@ -1919,7 +1927,7 @@ protected:
 	}
 	virtual void m_dataViewListCtrl2OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 1; position = m_dataViewListCtrl2->GetSelectedRow();
 		if (1 == view_mode && dataViewListCtrlNo == 1 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) < now->GetUserTypeListSize()) {
@@ -1945,7 +1953,7 @@ protected:
 	}
 	virtual void m_dataViewListCtrl3OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 2; position = m_dataViewListCtrl3->GetSelectedRow();
 		if (1 == view_mode && dataViewListCtrlNo == 2 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2 < now->GetUserTypeListSize()) {
@@ -1970,7 +1978,7 @@ protected:
 	}
 	virtual void m_dataViewListCtrl4OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 3; position = m_dataViewListCtrl4->GetSelectedRow();
 		if (1 == view_mode && dataViewListCtrlNo == 3 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3 < now->GetUserTypeListSize()) {
@@ -2040,28 +2048,28 @@ protected:
 
 	virtual void m_dataViewListCtrl1OnDataViewListCtrlSelectionchanged(wxDataViewEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 0;
 		position = m_dataViewListCtrl1->GetSelectedRow();
 	}
 	virtual void m_dataViewListCtrl2OnDataViewListCtrlSelectionchanged(wxDataViewEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 1;
 		position = m_dataViewListCtrl2->GetSelectedRow();
 	}
 	virtual void m_dataViewListCtrl3OnDataViewListCtrlSelectionchanged(wxDataViewEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 2;
 		position = m_dataViewListCtrl3->GetSelectedRow();
 	}
 	virtual void m_dataViewListCtrl4OnDataViewListCtrlSelectionchanged(wxDataViewEvent& event) {
 		if (*changed) { changedEvent();
-			return;
+			if (!isMain) { return; }
 		}
 		dataViewListCtrlNo = 3;
 		position = m_dataViewListCtrl4->GetSelectedRow();
@@ -2127,8 +2135,10 @@ protected:
 
 
 	virtual void m_code_run_buttonOnButtonClick(wxCommandEvent& event) {
+		if (!isMain) { return; }
+
 		if (*changed) { changedEvent();
-			return;
+			//return;
 		}
 		string mainStr = "Main = { $call = { id = main } }";
 		string eventStr(m_code->GetValue().ToUTF8());
