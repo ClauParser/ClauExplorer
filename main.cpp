@@ -2126,6 +2126,14 @@ protected:
 		
 		frame->dir_vec = this->dir_vec;
 
+		std::string dir = "/.";
+		for (int i = 0; i < frame->dir_vec.size(); ++i) {
+			dir += "/";
+			dir += frame->dir_vec[i];
+		}
+
+		frame->dir_text->ChangeValue(wxString::FromUTF8(dir.c_str()));
+
 		frame->RefreshTable(frame->now);
 
 		frame->SetTitle(GetTitle() + wxT(" : other window"));
