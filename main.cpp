@@ -7,8 +7,12 @@
 
 
 #include "ClauText.h" 
+
+#include "smart_ptr.h"
 #include <string>
 #include <algorithm>
+
+#include <utility>
 //
 #include <Windows.h>
 //
@@ -39,7 +43,7 @@
 
 class UtInfo {
 public:
-	wiz::load_data::UserType* global = nullptr;
+	wiz::SmartPtr<wiz::load_data::UserType> global;
 	wiz::load_data::UserType* ut;
 	std::string dir;
 	long long itCount = 0;
@@ -95,7 +99,7 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 }
 
 
-bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
+bool _InsertFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
 	std::queue<UtInfo> que;
 
 	std::string dir = "/.";
@@ -196,7 +200,7 @@ bool _InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 	return true;
 }
 
-bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
+bool _RemoveFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
 	std::queue<UtInfo> que;
 	std::string dir = "/.";
 	que.push(UtInfo(global, insert_ut, dir));
@@ -299,7 +303,7 @@ bool _RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 }
 
 
-bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
+bool _UpdateFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
 	std::queue<UtInfo> que;
 	std::string dir = "/.";
 	que.push(UtInfo(global, insert_ut, dir));
@@ -401,7 +405,7 @@ bool _UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* ins
 
 // starts with '@' -> insert target
 // else -> condition target.
-bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
+bool InsertFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
 	if (!_InsertFunc(global, insert_ut, eventUT)) {
 		return false;
 	}
@@ -531,7 +535,7 @@ bool InsertFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 	return true;
 }
 
-bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
+bool RemoveFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
 	if (!_RemoveFunc(global, insert_ut, eventUT)) {
 		return false;
 	}
@@ -741,7 +745,7 @@ bool RemoveFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* inse
 	return true;
 }
 
-bool UpdateFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
+bool UpdateFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::UserType* insert_ut, wiz::load_data::UserType* eventUT) {
 	if (!_UpdateFunc(global, insert_ut, eventUT)) {
 		return false;
 	}
@@ -889,7 +893,7 @@ class ChangeWindow : public wxDialog
 private:
 	// function??
 	int view_mode;
-	wiz::load_data::UserType* ut;
+	wiz::SmartPtr<wiz::load_data::UserType> ut;
 	bool isUserType; // ut(true) or it(false)
 	int idx; // utidx or itidx. or ilist idx(type == insert)
 	int type; // change 1, insert 2
@@ -929,11 +933,11 @@ protected:
 	}
 
 public:
-	ChangeWindow(wxWindow* parent, wiz::load_data::UserType* ut, bool isUserType, int idx, int type, int view_mode, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(580, 198), long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
+	ChangeWindow(wxWindow* parent, wiz::SmartPtr<wiz::load_data::UserType> ut, bool isUserType, int idx, int type, int view_mode, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(580, 198), long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
 	~ChangeWindow();
 };
 
-ChangeWindow::ChangeWindow(wxWindow* parent, wiz::load_data::UserType* ut, bool isUserType, int idx, int type, int view_mode, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
+ChangeWindow::ChangeWindow(wxWindow* parent, wiz::SmartPtr<wiz::load_data::UserType> ut, bool isUserType, int idx, int type, int view_mode, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
 	: ut(ut), isUserType(isUserType), idx(idx), type(type), view_mode(view_mode), wxDialog(parent, id, "change/insert window", pos, size, style)
 {
 
@@ -981,15 +985,33 @@ class MainFrame : public wxFrame
 private:
 	bool isMain = false;
 	int view_mode = 1; // todo, insert : when view_mode == 2.
-	wiz::load_data::UserType global;
+
+	wiz::SmartPtr<wiz::load_data::UserType> global;
 	wiz::load_data::UserType* now = nullptr;
 
 	int dataViewListCtrlNo = -1;
 	int position = -1;
 
+	int run_count = 0;
+
+	wiz::SmartPtr<bool> changed;
+
 	std::vector<std::string> dir_vec;
 private:
-	void RefreshTable(wiz::load_data::UserType* now)
+
+	void changedEvent() {
+		//m_code_run_result->ChangeValue(wxT("changed"));
+		dir_text->SetLabelText(wxT("/."));
+		now = global;
+		dir_vec.clear();
+		position = -1;
+		dataViewListCtrlNo = -1;
+
+		RefreshTable(now);
+	
+		*changed = false;
+	}
+	void RefreshTable(wiz::SmartPtr<wiz::load_data::UserType> now)
 	{
 		m_dataViewListCtrl1->DeleteAllItems();
 		m_dataViewListCtrl2->DeleteAllItems();
@@ -1020,7 +1042,7 @@ private:
 			}
 		}
 	}
-	void AddData(wiz::load_data::UserType* global)
+	void AddData(wiz::SmartPtr<wiz::load_data::UserType> global)
 	{
 		if (1 == view_mode) {
 			const int size = global->GetUserTypeListSize() + global->GetItemListSize();
@@ -1122,7 +1144,109 @@ private:
 				count++;
 			}
 		}
-		else {
+		else if (3 == view_mode) {
+			const int size = global->GetUserTypeListSize() + global->GetItemListSize();
+			const int utSize = global->GetUserTypeListSize();
+			const int size_per_unit = size / 4;
+			const int last_size = size - size_per_unit * 3;
+			int count = 0;
+			int utCount = 0;
+			int itCount = 0;
+
+			wxVector<wxVariant> value;
+
+			global->Sort(); // cf) 1 == view_mode
+			
+			for (int i = 0; i < size_per_unit; ++i) {
+				value.clear();
+
+				if (count < utSize) {
+					if (wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).empty()) {
+						value.push_back(wxVariant(wxT("@NO_NAME")));
+					}
+					else {
+						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).c_str(), wxConvUTF8)));
+					}
+					value.push_back(wxVariant(wxT("")));
+					utCount++;
+				}
+				else {
+					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)).c_str(), wxConvUTF8)));
+					itCount++;
+				}
+
+				m_dataViewListCtrl1->AppendItem(value);
+				count++;
+			}
+			for (int i = 0; i < size_per_unit; ++i) {
+				value.clear();
+
+				if (count < utSize) {
+					if (wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).empty()) {
+						value.push_back(wxVariant(wxT("@NO_NAME")));
+					}
+					else {
+						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).c_str(), wxConvUTF8)));
+					}
+					value.push_back(wxVariant(wxT("")));
+					utCount++;
+				}
+				else {
+					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)).c_str(), wxConvUTF8)));
+					itCount++;
+				}
+
+				m_dataViewListCtrl2->AppendItem(value);
+				count++;
+			}
+			for (int i = 0; i < size_per_unit; ++i) {
+				value.clear();
+
+				if (count < utSize) {
+					if (wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).empty()) {
+						value.push_back(wxVariant(wxT("@NO_NAME")));
+					}
+					else {
+						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).c_str(), wxConvUTF8)));
+					}
+					value.push_back(wxVariant(wxT("")));
+					utCount++;
+				}
+				else {
+					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)).c_str(), wxConvUTF8)));
+					itCount++;
+				}
+
+				m_dataViewListCtrl3->AppendItem(value);
+				count++;
+			}
+			for (int i = 0; i < last_size; ++i) {
+				value.clear();
+
+				if (count < utSize) {
+					if (wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).empty()) {
+						value.push_back(wxVariant(wxT("@NO_NAME")));
+					}
+					else {
+						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).c_str(), wxConvUTF8)));
+					}
+					value.push_back(wxVariant(wxT("")));
+					utCount++;
+				}
+				else {
+					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)).c_str(), wxConvUTF8)));
+					itCount++;
+				}
+
+				m_dataViewListCtrl4->AppendItem(value);
+				count++;
+			}
+		}
+		else if (2 == view_mode){
 			const int size = global->GetUserTypeListSize() + global->GetItemListSize();
 			const int utSize = global->GetUserTypeListSize();
 			const int size_per_unit = size / 4;
@@ -1241,6 +1365,9 @@ protected:
 	wxDataViewListCtrl* m_dataViewListCtrl4;
 	wxStatusBar* m_statusBar1;
 
+	wxTextCtrl* m_code_run_result;
+	wxStaticText* m_now_view_text;
+
 	void EnterDir(const std::string& name) {
 		dir_vec.push_back(name);
 
@@ -1274,16 +1401,65 @@ protected:
 			wxString _fileName = openFileDialog->GetPath();
 			std::string fileName(_fileName.c_str());
 
-			global.Remove();
-			wiz::load_data::LoadData::LoadDataFromFile(fileName, global, 0, 0);
-			now = &global;
+			global->RemoveAll();
+
+			if (wiz::load_data::LoadData::LoadDataFromFile(fileName, *global, 0, 0)) {
+				m_code_run_result->ChangeValue(wxT("Load Success!"));
+			}
+			else {
+				m_code_run_result->ChangeValue(wxT("Load Failed!"));
+			}
+			now = global;
+
+			view_mode = 1; // todo, insert : when view_mode == 2.
+
+			dataViewListCtrlNo = -1;
+			position = -1;
+
+			run_count = 0;
+
+			dir_vec = std::vector<std::string>();
+
+			dir_text->ChangeValue(wxT("/."));
+
+			m_now_view_text->SetLabelText(wxT("View Mode A"));
 
 			RefreshTable(now);
 
 			SetTitle(wxT("ClauExplorer : ") + _fileName);
+
+			*changed = true;
 		}
 		openFileDialog->Destroy();
 	}
+	
+	virtual void FileNewMenuOnMenuSelection(wxCommandEvent& event) {
+		if (!isMain) { return; }
+	
+		now = nullptr;
+		global->RemoveAll();
+		now = global;
+
+		view_mode = 1; // todo, insert : when view_mode == 2.
+
+		dataViewListCtrlNo = -1;
+		position = -1;
+
+		run_count = 0;
+		
+		dir_vec = std::vector<std::string>();
+
+		dir_text->ChangeValue(wxT("/."));
+		
+		m_now_view_text->SetLabelText(wxT("View Mode A"));
+
+		RefreshTable(now);
+
+		m_code_run_result->ChangeValue(wxT("New Success!"));
+
+		*changed = true;
+	}
+	
 	virtual void FileSaveMenuOnMenuSelection(wxCommandEvent& event) {
 		if (!isMain) { return; }
 		wxFileDialog* saveFileDialog = new wxFileDialog(this, _("Save"), "", "",
@@ -1293,14 +1469,19 @@ protected:
 		{
 			string fileName(saveFileDialog->GetPath().c_str());
 
-			wiz::load_data::LoadData::SaveWizDB(global, fileName, "1");
+			wiz::load_data::LoadData::SaveWizDB(*global, fileName, "1");
+
+			m_code_run_result->SetLabelText(saveFileDialog->GetPath() + wxT(" is saved.."));
 		}
 		saveFileDialog->Destroy();
 	}
 	virtual void FileExitMenuOnMenuSelection(wxCommandEvent& event) { Close(true); }
 	virtual void InsertMenuOnMenuSelection(wxCommandEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 
-		if (1 == view_mode) { return; }
+		if (1 == view_mode || 3 == view_mode) { return; }
 		if (-1 == position) {
 			ChangeWindow* changeWindow = new ChangeWindow(this, now, 0, std::max<int>(0, now->GetIListSize()), 2, view_mode);
 
@@ -1326,9 +1507,12 @@ protected:
 		}
 	}
 	virtual void ChangeMenuOnMenuSelection(wxCommandEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		if (-1 == position) { return; }
 
-		if (1 == view_mode) {
+		if (1 == view_mode || 3 == view_mode) {
 			int idx = position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * dataViewListCtrlNo;
 			bool isUserType = (idx < now->GetUserTypeListSize());
 
@@ -1356,11 +1540,14 @@ protected:
 		}
 	}
 	virtual void RemoveMenuOnMenuSelection(wxCommandEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		if (-1 == position) { return; }
 		int idx = position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * dataViewListCtrlNo;
 		int type = 1;
 
-		if (1 == view_mode) {
+		if (1 == view_mode || 3 == view_mode) {
 			bool isUserType = (idx < now->GetUserTypeListSize());
 
 			if (isUserType) {
@@ -1384,6 +1571,9 @@ protected:
 		}
 	}
 	virtual void back_buttonOnButtonClick(wxCommandEvent& event) {
+		if (*changed) {
+			changedEvent();
+		}
 		if (now && now->GetParent()) {
 			RefreshTable(now->GetParent());
 			now = now->GetParent();
@@ -1391,12 +1581,27 @@ protected:
 		}
 	}
 	virtual void refresh_buttonOnButtonClick(wxCommandEvent& event) {
+		if (*changed) {
+			changedEvent();
+		}
+
 		if (now) {
+			std::string dir = "/.";
+			for (int i = 0; i < dir_vec.size(); ++i) {
+				dir += "/";
+				dir += dir_vec[i];
+			}
+
+			dir_text->ChangeValue(wxString::FromUTF8(dir.c_str()));
+
 			RefreshTable(now);
 		}
 	}
 
 	virtual void m_dataViewListCtrl1OnChar(wxKeyEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 0; position = m_dataViewListCtrl1->GetSelectedRow();
 		if (WXK_ESCAPE == event.GetKeyCode()) {
 			wxDataViewListCtrl* ctrl[4];
@@ -1412,6 +1617,11 @@ protected:
 		}
 		else if (1 == view_mode && NK_ENTER == event.GetKeyCode() && position >= 0 && position < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position);
+			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
+		}
+		else if (3 == view_mode && NK_ENTER == event.GetKeyCode() && position >= 0 && position < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeListEX(position);
 			RefreshTable(now);
 			EnterDir(now->GetName().ToString());
 		}
@@ -1461,6 +1671,9 @@ protected:
 		}
 	}
 	virtual void m_dataViewListCtrl2OnChar(wxKeyEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 1; position = m_dataViewListCtrl2->GetSelectedRow();
 		if (WXK_ESCAPE == event.GetKeyCode()) {
 			wxDataViewListCtrl* ctrl[4];
@@ -1476,6 +1689,11 @@ protected:
 		}
 		else if (1 == view_mode && NK_ENTER == event.GetKeyCode() && dataViewListCtrlNo == 1 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
+			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
+		}
+		else if (3 == view_mode && NK_ENTER == event.GetKeyCode() && dataViewListCtrlNo == 1 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeListEX(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
 			RefreshTable(now);
 			EnterDir(now->GetName().ToString());
 		}
@@ -1527,6 +1745,9 @@ protected:
 
 	}
 	virtual void m_dataViewListCtrl3OnChar(wxKeyEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 2; position = m_dataViewListCtrl3->GetSelectedRow();
 		if (WXK_ESCAPE == event.GetKeyCode()) {
 			wxDataViewListCtrl* ctrl[4];
@@ -1542,6 +1763,11 @@ protected:
 		}
 		else if (1 == view_mode && NK_ENTER == event.GetKeyCode() && dataViewListCtrlNo == 2 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
+			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
+		}
+		else if (3 == view_mode && NK_ENTER == event.GetKeyCode() && dataViewListCtrlNo == 2 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2 < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeListEX(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
 			RefreshTable(now);
 			EnterDir(now->GetName().ToString());
 		}
@@ -1592,6 +1818,9 @@ protected:
 		}
 	}
 	virtual void m_dataViewListCtrl4OnChar(wxKeyEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 3; position = m_dataViewListCtrl4->GetSelectedRow();
 		if (WXK_ESCAPE == event.GetKeyCode()) {
 			wxDataViewListCtrl* ctrl[4];
@@ -1607,6 +1836,11 @@ protected:
 		}
 		else if (1 == view_mode && NK_ENTER == event.GetKeyCode() && dataViewListCtrlNo == 3 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
+			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
+		}
+		else if (3 == view_mode && NK_ENTER == event.GetKeyCode() && dataViewListCtrlNo == 3 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3 < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeListEX(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
 			RefreshTable(now);
 			EnterDir(now->GetName().ToString());
 		}
@@ -1657,11 +1891,20 @@ protected:
 		}
 	}
 
+	// double click.
 	virtual void m_dataViewListCtrl1OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 0; position = m_dataViewListCtrl1->GetSelectedRow();
 
 		if (1 == view_mode && position >= 0 && position < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position);
+			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
+		}
+		else if (3 == view_mode && position >= 0 && position < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeListEX(position);
 			RefreshTable(now);
 			EnterDir(now->GetName().ToString());
 		}
@@ -1675,12 +1918,21 @@ protected:
 		}
 	}
 	virtual void m_dataViewListCtrl2OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 1; position = m_dataViewListCtrl2->GetSelectedRow();
 		if (1 == view_mode && dataViewListCtrlNo == 1 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
 			RefreshTable(now);
 			EnterDir(now->GetName().ToString());
 		}
+		else if (3 == view_mode && dataViewListCtrlNo == 1 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeListEX(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
+			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
+		}
+
 		else  if (2 == view_mode && position >= 0 && position < m_dataViewListCtrl2->GetItemCount()) {
 			const int pos = (position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4));
 			if (now->IsUserTypeList(pos)) {
@@ -1692,9 +1944,17 @@ protected:
 		}
 	}
 	virtual void m_dataViewListCtrl3OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 2; position = m_dataViewListCtrl3->GetSelectedRow();
 		if (1 == view_mode && dataViewListCtrlNo == 2 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
+			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
+		}
+		else if (3 == view_mode && dataViewListCtrlNo == 2 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2 < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeListEX(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 2);
 			RefreshTable(now);
 			EnterDir(now->GetName().ToString());
 		}
@@ -1709,9 +1969,17 @@ protected:
 		}
 	}
 	virtual void m_dataViewListCtrl4OnDataViewListCtrlItemActivated(wxDataViewEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 3; position = m_dataViewListCtrl4->GetSelectedRow();
 		if (1 == view_mode && dataViewListCtrlNo == 3 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3 < now->GetUserTypeListSize()) {
 			now = now->GetUserTypeList(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
+			RefreshTable(now);
+			EnterDir(now->GetName().ToString());
+		}
+		else if (3 == view_mode && dataViewListCtrlNo == 3 && position >= 0 && position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3 < now->GetUserTypeListSize()) {
+			now = now->GetUserTypeListEX(position + ((now->GetUserTypeListSize() + now->GetItemListSize()) / 4) * 3);
 			RefreshTable(now);
 			EnterDir(now->GetName().ToString());
 		}
@@ -1727,29 +1995,42 @@ protected:
 		}
 	}
 
+	// right click.
 	virtual void m_dataViewListCtrl1OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
-		if (now->GetParent()) {
+		if (*changed) {
+			changedEvent();
+		}
+		if (now && now->GetParent()) {
 			now = now->GetParent();
 			RefreshTable(now);
 			BackDir();
 		}
 	}
 	virtual void m_dataViewListCtrl2OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
-		if (now->GetParent()) {
+		if (*changed) {
+			changedEvent();
+		}
+		if (now && now->GetParent()) {
 			now = now->GetParent();
 			RefreshTable(now);
 			BackDir();
 		}
 	}
 	virtual void m_dataViewListCtrl3OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
-		if (now->GetParent()) {
+		if (*changed) {
+			changedEvent();
+		}
+		if (now && now->GetParent()) {
 			now = now->GetParent();
 			RefreshTable(now);
 			BackDir();
 		}
 	}
 	virtual void m_dataViewListCtrl4OnDataViewListCtrlItemContextMenu(wxDataViewEvent& event) {
-		if (now->GetParent()) {
+		if (*changed) {
+			changedEvent();
+		}
+		if (now && now->GetParent()) {
 			now = now->GetParent();
 			RefreshTable(now);
 			BackDir();
@@ -1757,19 +2038,31 @@ protected:
 	}
 
 
-	virtual void m_dataViewListCtrl1OnDataViewListCtrlSelectionChanged(wxDataViewEvent& event) {
+	virtual void m_dataViewListCtrl1OnDataViewListCtrlSelectionchanged(wxDataViewEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 0;
 		position = m_dataViewListCtrl1->GetSelectedRow();
 	}
-	virtual void m_dataViewListCtrl2OnDataViewListCtrlSelectionChanged(wxDataViewEvent& event) {
+	virtual void m_dataViewListCtrl2OnDataViewListCtrlSelectionchanged(wxDataViewEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 1;
 		position = m_dataViewListCtrl2->GetSelectedRow();
 	}
-	virtual void m_dataViewListCtrl3OnDataViewListCtrlSelectionChanged(wxDataViewEvent& event) {
+	virtual void m_dataViewListCtrl3OnDataViewListCtrlSelectionchanged(wxDataViewEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 2;
 		position = m_dataViewListCtrl3->GetSelectedRow();
 	}
-	virtual void m_dataViewListCtrl4OnDataViewListCtrlSelectionChanged(wxDataViewEvent& event) {
+	virtual void m_dataViewListCtrl4OnDataViewListCtrlSelectionchanged(wxDataViewEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		dataViewListCtrlNo = 3;
 		position = m_dataViewListCtrl4->GetSelectedRow();
 	}
@@ -1797,24 +2090,34 @@ protected:
 
 	virtual void DefaultViewMenuOnMenuSelection(wxCommandEvent& event) {
 		view_mode = 1;
-		m_statusBar1->SetLabelText(wxT("View Mode A"));
+		m_now_view_text->SetLabelText(wxT("View Mode A"));
 		if (now) {
 			RefreshTable(now);
 		}
 	}
 	virtual void IListViewMenuOnMenuSelection(wxCommandEvent& event) {
 		view_mode = 2;
-		m_statusBar1->SetLabelText(wxT("View Mode B"));
+		m_now_view_text->SetLabelText(wxT("View Mode B"));
 		if (now) {
 			RefreshTable(now);
 		}
 	}
-
+	virtual void ViewCMenuOnMenuSelection(wxCommandEvent& event) {
+		view_mode = 3;
+		m_now_view_text->SetLabelText(wxT("View Mode C"));
+		if (now) {
+			RefreshTable(now);
+		}
+	}
 	virtual void OtherWindowMenuOnMenuSelection(wxCommandEvent& event) {
+		if (*changed) { changedEvent(); }
+
 		if (!isMain) { return; }
-		MainFrame* frame = new MainFrame(this);
-		frame->view_mode = this->view_mode;
-		frame->now = this->now;
+		MainFrame* frame = new MainFrame(this->changed, this->global, this->now,  this);
+		frame->view_mode = 1;
+		
+		frame->dir_vec = this->dir_vec;
+
 		frame->RefreshTable(frame->now);
 
 		frame->SetTitle(GetTitle() + wxT(" : other window"));
@@ -1822,7 +2125,11 @@ protected:
 		frame->Show(true);
 	}
 
+
 	virtual void m_code_run_buttonOnButtonClick(wxCommandEvent& event) {
+		if (*changed) { changedEvent();
+			return;
+		}
 		string mainStr = "Main = { $call = { id = main } }";
 		string eventStr(m_code->GetValue().ToUTF8());
 		wiz::load_data::UserType eventUT;
@@ -1834,6 +2141,9 @@ protected:
 		//executeData.noUseInput = true;
 		//executeData.noUseOutput = true;
 
+		
+		run_count++;
+		std::string str = std::to_string(run_count);
 		try {
 			wiz::Option opt;
 
@@ -1852,8 +2162,12 @@ protected:
 			//wiz::ClauText().execute_module(mainStr, now, executeData, opt, 0);
 
 			RefreshTable(now);
+			m_code_run_result->SetLabelText(wxString::FromUTF8(str.c_str()) + wxT(" run.. end.."));
 		}
 		catch (...) {
+			RefreshTable(now);
+
+			m_code_run_result->SetLabelText(wxString::FromUTF8(str.c_str()) + wxT(" run.. failed.."));
 			//
 		}
 	}
@@ -1873,23 +2187,50 @@ protected:
 public:
 
 	MainFrame(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("ClauExplorer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(1024, 512), long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
-
+private:
+	MainFrame(wiz::SmartPtr<bool> changed, wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::UserType* now, wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("ClauExplorer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(1024, 512), long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
+public:
 	~MainFrame();
+	
+	void init(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("ClauExplorer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(1024, 512), long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
 
 	void FirstFrame() {
 		isMain = true;
+
+		global = new wiz::load_data::UserType();
+		now = global;
 	}
 };
+MainFrame::MainFrame(wiz::SmartPtr<bool> changed, wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::UserType* now, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxFrame(parent, id, title, pos, size, style)
+{
+	init(parent, id, title, pos, size, style);
 
+	this->changed = changed;
+	this->global = global;
+	this->now = now;
+}
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxFrame(parent, id, title, pos, size, style)
 {
-	now = &global;
+	changed = new bool;
+	
+	*changed = false;
 
+	init(parent, id, title, pos, size, style);
+}
 
+void MainFrame::init(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style)
+{
 	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
 
 	menuBar = new wxMenuBar(0);
 	FileMenu = new wxMenu();
+
+
+	wxMenuItem* FileNewMenu;
+	FileNewMenu = new wxMenuItem(FileMenu, wxID_ANY, wxString(wxT("New")), wxEmptyString, wxITEM_NORMAL);
+	FileMenu->Append(FileNewMenu);
+
+
 	wxMenuItem* FileLoadMenu;
 	FileLoadMenu = new wxMenuItem(FileMenu, wxID_ANY, wxString(wxT("Load")), wxEmptyString, wxITEM_NORMAL);
 	FileMenu->Append(FileLoadMenu);
@@ -1932,6 +2273,10 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	IListViewMenu = new wxMenuItem(ViewMenu, wxID_ANY, wxString(wxT("ViewB")), wxEmptyString, wxITEM_NORMAL);
 	ViewMenu->Append(IListViewMenu);
 
+
+	wxMenuItem* ViewCMenu;
+	ViewCMenu = new wxMenuItem(ViewMenu, wxID_ANY, wxString(wxT("ViewC")), wxEmptyString, wxITEM_NORMAL);
+	ViewMenu->Append(ViewCMenu);
 	//wxMenuItem* CodeViewMenu;
 	//CodeViewMenu = new wxMenuItem(ViewMenu, wxID_ANY, wxString(wxT("CodeView")), wxEmptyString, wxITEM_NORMAL);
 	//ViewMenu->Append(CodeViewMenu);
@@ -1958,18 +2303,18 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	back_button = new wxButton(this, wxID_ANY, wxT("▲"), wxDefaultPosition, wxDefaultSize, 0);
 	back_button->SetFont(wxFont(15, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString));
 
-	bSizer2->Add(back_button, 0, wxALL, 5);
+	bSizer2->Add(back_button, 1, wxALL | wxEXPAND, 5);
 
-	dir_text = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	dir_text = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 	dir_text->Enable(false);
 
-	bSizer2->Add(dir_text, 1, wxALL, 5);
+	bSizer2->Add(dir_text, 13, wxALL | wxEXPAND, 5);
 
 	refresh_button = new wxButton(this, wxID_ANY, wxT("Refresh"), wxDefaultPosition, wxDefaultSize, 0);
-	bSizer2->Add(refresh_button, 0, wxALL, 5);
+	bSizer2->Add(refresh_button, 1, wxALL | wxEXPAND, 5);
 
 
-	bSizer->Add(bSizer2, 0, wxEXPAND, 5);
+	bSizer->Add(bSizer2, 1, wxEXPAND, 5);
 
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer(wxHORIZONTAL);
@@ -1990,7 +2335,8 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	bSizer6 = new wxBoxSizer(wxVERTICAL);
 
 	m_code = new wxStyledTextCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, wxEmptyString);
-	m_code->SetText(wxT("#ClauExplorer (https://github.com/ClauParser/ClauExplorer) \n#\t\t제작자 vztpv@naver.com\n"));
+	m_code->SetText(wxT(
+		"#ClauExplorer (https://github.com/ClauParser/ClauExplorer) \n#		제작자 vztpv@naver.com"));
 	m_code->SetUseTabs(true);
 	m_code->SetTabWidth(4);
 	m_code->SetIndent(4);
@@ -2025,6 +2371,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	m_code->MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL, wxSTC_MARK_EMPTY);
 	m_code->SetSelBackground(true, wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT));
 	m_code->SetSelForeground(true, wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHTTEXT));
+
 	bSizer6->Add(m_code, 9, wxEXPAND | wxALL, 5);
 
 	//m_code->Hide();
@@ -2037,7 +2384,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	bSizer3->Add(bSizer6, 2, wxEXPAND, 5);
 
 
-	bSizer->Add(bSizer3, 1, wxEXPAND, 5);
+	bSizer->Add(bSizer3, 12, wxEXPAND, 5);
 
 
 	m_dataViewListCtrl1->AppendTextColumn(wxT("name"));
@@ -2054,7 +2401,22 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 
 	m_statusBar1 = this->CreateStatusBar(1, wxST_SIZEGRIP, wxID_ANY);
 
-	m_statusBar1->SetLabelText(wxT("View Mode A"));
+	m_statusBar1->SetLabelText(wxT(""));
+
+	wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer(wxHORIZONTAL);
+
+	m_code_run_result = new wxTextCtrl(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+	m_code_run_result->Enable(false);
+	bSizer5->Add(m_code_run_result, 7, wxALL, 5);
+
+	m_now_view_text = new wxStaticText(this, wxID_ANY, wxT("View Mode A"), wxDefaultPosition, wxDefaultSize, 0);
+	m_now_view_text->Wrap(-1);
+	bSizer5->Add(m_now_view_text, 1, wxALL, 5);
+
+
+	bSizer->Add(bSizer5, 0, wxEXPAND, 5);
+
 
 	this->SetSizer(bSizer);
 	this->Layout();
@@ -2062,6 +2424,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	this->Centre(wxBOTH);
 
 	// Connect Events
+	this->Connect(FileNewMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::FileNewMenuOnMenuSelection));
 	this->Connect(FileLoadMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::FileLoadMenuOnMenuSelection));
 	this->Connect(FileSaveMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::FileSaveMenuOnMenuSelection));
 	this->Connect(FileExitMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::FileExitMenuOnMenuSelection));
@@ -2072,6 +2435,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 
 	this->Connect(DefaultViewMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::DefaultViewMenuOnMenuSelection));
 	this->Connect(IListViewMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::IListViewMenuOnMenuSelection));
+	this->Connect(ViewCMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::ViewCMenuOnMenuSelection));
 
 	back_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::back_buttonOnButtonClick), NULL, this);
 	refresh_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::refresh_buttonOnButtonClick), NULL, this);
@@ -2099,10 +2463,11 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	m_dataViewListCtrl3->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlItemContextMenu), NULL, this);
 	m_dataViewListCtrl4->Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemContextMenu), NULL, this);
 
-	m_dataViewListCtrl1->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlSelectionChanged), NULL, this);
-	m_dataViewListCtrl2->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlSelectionChanged), NULL, this);
-	m_dataViewListCtrl3->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlSelectionChanged), NULL, this);
-	m_dataViewListCtrl4->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlSelectionChanged), NULL, this);
+	m_dataViewListCtrl1->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlSelectionchanged), NULL, this);
+	m_dataViewListCtrl2->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlSelectionchanged), NULL, this);
+	m_dataViewListCtrl3->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlSelectionchanged), NULL, this);
+	m_dataViewListCtrl4->Connect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlSelectionchanged), NULL, this);
+
 
 	this->Connect(OtherWindowMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::OtherWindowMenuOnMenuSelection));
 	m_code_run_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::m_code_run_buttonOnButtonClick), NULL, this);
@@ -2111,7 +2476,12 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 
 MainFrame::~MainFrame()
 {
+	if (isMain) {
+		global.remove();
+		changed.remove();
+	}
 	// Disconnect Events
+	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::FileNewMenuOnMenuSelection));
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::FileLoadMenuOnMenuSelection));
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::FileSaveMenuOnMenuSelection));
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::FileExitMenuOnMenuSelection));
@@ -2124,6 +2494,7 @@ MainFrame::~MainFrame()
 
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::DefaultViewMenuOnMenuSelection));
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::IListViewMenuOnMenuSelection));
+	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::ViewCMenuOnMenuSelection));
 
 	m_dataViewListCtrl1->Disconnect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl1OnSize), NULL, this);
 	m_dataViewListCtrl2->Disconnect(wxEVT_SIZE, wxSizeEventHandler(MainFrame::m_dataViewListCtrl2OnSize), NULL, this);
@@ -2147,11 +2518,11 @@ MainFrame::~MainFrame()
 	m_dataViewListCtrl4->Disconnect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlItemContextMenu), NULL, this);
 
 
-	m_dataViewListCtrl1->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlSelectionChanged), NULL, this);
-	m_dataViewListCtrl2->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlSelectionChanged), NULL, this);
-	m_dataViewListCtrl3->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlSelectionChanged), NULL, this);
-	m_dataViewListCtrl4->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlSelectionChanged), NULL, this);
-
+	m_dataViewListCtrl1->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl1OnDataViewListCtrlSelectionchanged), NULL, this);
+	m_dataViewListCtrl2->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl2OnDataViewListCtrlSelectionchanged), NULL, this);
+	m_dataViewListCtrl3->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl3OnDataViewListCtrlSelectionchanged), NULL, this);
+	m_dataViewListCtrl4->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlSelectionchanged), NULL, this);
+	
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::OtherWindowMenuOnMenuSelection));
 
 	m_code_run_button->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::m_code_run_buttonOnButtonClick), NULL, this);
@@ -2169,4 +2540,5 @@ public:
 };
 
 IMPLEMENT_APP(TestApp)
+
 
