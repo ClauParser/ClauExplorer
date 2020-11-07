@@ -903,6 +903,63 @@ bool UpdateFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 
 using namespace std;
 
+class TextFrame : public wxFrame
+{
+private:
+
+protected:
+	wxTextCtrl* m_textCtrl;
+	wxButton* m_button;
+	wiz::load_data::UserType** now;
+
+	// Virtual event handlers, overide them in your derived class
+	virtual void m_buttonOnButtonClick(wxCommandEvent& event) { 
+		m_textCtrl->ChangeValue(wxString::FromUTF8((*now)->ToStringEX().c_str())); 
+	}
+
+
+public:
+
+	TextFrame(wiz::load_data::UserType** now, wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(770, 381), long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
+
+	~TextFrame();
+
+};
+
+TextFrame::TextFrame(wiz::load_data::UserType** now, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxFrame(parent, id, title, pos, size, style)
+{
+	this->now = now;
+	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
+
+	wxBoxSizer* bSizer;
+	bSizer = new wxBoxSizer(wxVERTICAL);
+
+	m_textCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+	bSizer->Add(m_textCtrl, 10, wxALL | wxEXPAND, 5);
+
+	m_button = new wxButton(this, wxID_ANY, wxT("Refresh"), wxDefaultPosition, wxDefaultSize, 0);
+	bSizer->Add(m_button, 1, wxALL | wxEXPAND, 5);
+
+
+	this->SetSizer(bSizer);
+	this->Layout();
+
+	this->Centre(wxBOTH);
+
+	// Connect Events
+	m_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TextFrame::m_buttonOnButtonClick), NULL, this);
+
+	m_textCtrl->ChangeValue(wxString::FromUTF8((*now)->ToStringEX().c_str()));
+}
+
+TextFrame::~TextFrame()
+{
+	// Disconnect Events
+	m_button->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TextFrame::m_buttonOnButtonClick), NULL, this);
+
+}
+
+
 class ChangeWindow : public wxDialog
 {
 private:
@@ -2156,7 +2213,13 @@ protected:
 		frame->Show(true);
 	}
 
+	virtual void TextMenuOnMenuSelection(wxCommandEvent& event) {
+		if (*changed) { changedEvent(); }
 
+		TextFrame* frame = new TextFrame(&this->now, this);
+		
+		frame->Show(true);
+	}
 	virtual void m_code_run_buttonOnButtonClick(wxCommandEvent& event) {
 		if (!isMain) { return; }
 
@@ -2323,6 +2386,13 @@ void MainFrame::init(wxWindow* parent, wxWindowID id, const wxString& title, con
 	wxMenuItem* OtherWindowMenu;
 	OtherWindowMenu = new wxMenuItem(WindowMenu, wxID_ANY, wxString(wxT("OtherWindow")), wxEmptyString, wxITEM_NORMAL);
 	WindowMenu->Append(OtherWindowMenu);
+
+
+	wxMenuItem* TextMenu;
+	TextMenu = new wxMenuItem(WindowMenu, wxID_ANY, wxString(wxT("Text")), wxEmptyString, wxITEM_NORMAL);
+	WindowMenu->Append(TextMenu);
+
+
 
 	menuBar->Append(WindowMenu, wxT("Window"));
 
@@ -2505,6 +2575,7 @@ void MainFrame::init(wxWindow* parent, wxWindowID id, const wxString& title, con
 
 
 	this->Connect(OtherWindowMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::OtherWindowMenuOnMenuSelection));
+	this->Connect(TextMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::TextMenuOnMenuSelection));
 	m_code_run_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::m_code_run_buttonOnButtonClick), NULL, this);
 	//this->Connect(CodeViewMenu->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::CodeViewMenuOnMenuSelection));
 }
@@ -2559,6 +2630,7 @@ MainFrame::~MainFrame()
 	m_dataViewListCtrl4->Disconnect(wxEVT_COMMAND_DATAVIEW_SELECTION_CHANGED, wxDataViewEventHandler(MainFrame::m_dataViewListCtrl4OnDataViewListCtrlSelectionchanged), NULL, this);
 	
 	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::OtherWindowMenuOnMenuSelection));
+	this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::TextMenuOnMenuSelection));
 
 	m_code_run_button->Disconnect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::m_code_run_buttonOnButtonClick), NULL, this);
 	//this->Disconnect(wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MainFrame::CodeViewMenuOnMenuSelection));
