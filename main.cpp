@@ -2233,6 +2233,8 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	
 	*changed = false;
 
+
+
 	init(parent, id, title, pos, size, style);
 }
 
