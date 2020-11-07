@@ -5,17 +5,19 @@
 #include <vld.h>
 #endif
 
+#include <string>
+#include <algorithm>
+
 
 #include "ClauText.h" 
 
 #include "smart_ptr.h"
-#include <string>
-#include <algorithm>
+
 
 #include <utility>
 //
-#include <Windows.h>
 //
+#include <Windows.h>
 #include <wx/wx.h>
 
 #include <wx/defs.h>
@@ -39,6 +41,59 @@
 #include <wx/frame.h>
 
 
+enum class Encoding {
+	ANSI, UTF8
+};
+Encoding encoding = Encoding::UTF8;
+
+//auto default_cp = GetConsoleCP();
+
+inline std::string Convert(const wxString& str) {
+	if (Encoding::UTF8 == encoding) {
+		return str.ToUTF8().data();
+	}
+	else {
+		return str.To8BitData().data();
+	}
+}
+inline std::string Convert(wxString&& str) {
+	if (Encoding::UTF8 == encoding) {
+		return str.ToUTF8().data();
+	}
+	else {
+		return str.To8BitData().data();
+	}
+}
+
+inline wxString Convert(const std::string& str) {
+	if (Encoding::UTF8 == encoding) {
+		return wxString(str.c_str(), wxConvUTF8);
+	}
+	else {
+		//?
+		wxString temp(str.c_str(), wxCSConv(wxFONTENCODING_SYSTEM));
+
+		if (!str.empty() && temp.empty()) {
+			temp = wxString(str.c_str(), wxConvISO8859_1);
+		}
+
+		return temp;
+	}
+}
+inline wxString Convert(std::string&& str) {
+	if (Encoding::UTF8 == encoding) {
+		return wxString(str.c_str(), wxConvUTF8);
+	}
+	else {
+		wxString temp(str.c_str(), wxCSConv(wxFONTENCODING_SYSTEM));
+
+		if (!str.empty() && temp.empty()) {
+			temp = wxString(str.c_str(), wxConvISO8859_1);
+		}
+
+		return temp;
+	}
+}
 
 
 class UtInfo {
@@ -914,7 +969,7 @@ protected:
 
 	// Virtual event handlers, overide them in your derived class
 	virtual void m_buttonOnButtonClick(wxCommandEvent& event) { 
-		m_textCtrl->ChangeValue(wxString::FromUTF8((*now)->ToStringEX().c_str())); 
+		m_textCtrl->ChangeValue(Convert((*now)->ToStringEX())); 
 	}
 
 
@@ -949,7 +1004,7 @@ TextFrame::TextFrame(wiz::load_data::UserType** now, wxWindow* parent, wxWindowI
 	// Connect Events
 	m_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TextFrame::m_buttonOnButtonClick), NULL, this);
 
-	m_textCtrl->ChangeValue(wxString::FromUTF8((*now)->ToStringEX().c_str()));
+	m_textCtrl->ChangeValue(Convert((*now)->ToStringEX()));
 }
 
 TextFrame::~TextFrame()
@@ -976,8 +1031,8 @@ protected:
 
 	// Virtual event handlers, overide them in your derived class
 	virtual void okOnButtonClick(wxCommandEvent& event) {
-		string var(var_text->GetValue().ToUTF8());
-		string val(val_text->GetValue().ToUTF8());
+		string var(Convert(var_text->GetValue()));
+		string val(Convert(val_text->GetValue()));
 
 		if (1 == type) {
 			if (isUserType) {
@@ -1135,14 +1190,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeList(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeList(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).Get(0)))));
 					itCount++;
 				}
 
@@ -1157,14 +1212,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeList(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeList(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).Get(0)))));
 					itCount++;
 				}
 
@@ -1179,14 +1234,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeList(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeList(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).Get(0)))));
 					itCount++;
 				}
 
@@ -1201,14 +1256,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeList(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeList(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).Get(0)))));
 					itCount++;
 				}
 
@@ -1237,14 +1292,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)))));
 					itCount++;
 				}
 
@@ -1259,14 +1314,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)))));
 					itCount++;
 				}
 
@@ -1281,14 +1336,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)))));
 					itCount++;
 				}
 
@@ -1303,14 +1358,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeListEX(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemPtrListEX(itCount)->GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemPtrListEX(itCount)->Get(0)))));
 					itCount++;
 				}
 
@@ -1337,14 +1392,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeList(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeList(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).Get(0)))));
 					itCount++;
 				}
 
@@ -1359,14 +1414,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeList(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeList(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).Get(0)))));
 					itCount++;
 				}
 
@@ -1381,14 +1436,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeList(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeList(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).Get(0)))));
 					itCount++;
 				}
 
@@ -1403,14 +1458,14 @@ private:
 						value.push_back(wxVariant(wxT("@NO_NAME")));
 					}
 					else {
-						value.push_back(wxVariant(wxString(wiz::ToString(global->GetUserTypeList(utCount)->GetName()).c_str(), wxConvUTF8)));
+						value.push_back(wxVariant(Convert(wiz::ToString(global->GetUserTypeList(utCount)->GetName()))));
 					}
 					value.push_back(wxVariant(wxT("")));
 					utCount++;
 				}
 				else {
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).GetName()).c_str(), wxConvUTF8)));
-					value.push_back(wxVariant(wxString(wiz::ToString(global->GetItemList(itCount).Get(0)).c_str(), wxConvUTF8)));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).GetName()))));
+					value.push_back(wxVariant(Convert(wiz::ToString(global->GetItemList(itCount).Get(0)))));
 					itCount++;
 				}
 
@@ -1449,7 +1504,7 @@ protected:
 			dir += dir_vec[i];
 		}
 
-		dir_text->ChangeValue(wxString::FromUTF8(dir.c_str()));
+		dir_text->ChangeValue(Convert(dir));
 	}
 	void BackDir() {
 		if (!dir_vec.empty()) {
@@ -1461,7 +1516,7 @@ protected:
 				dir += dir_vec[i];
 			}
 
-			dir_text->ChangeValue(wxString::FromUTF8(dir.c_str()));
+			dir_text->ChangeValue(Convert(dir));
 		}
 	}
 	// Virtual event handlers, overide them in your derived class
@@ -1474,9 +1529,25 @@ protected:
 			std::string fileName(_fileName.c_str());
 
 			global->RemoveAll();
+			
+			int x = 0;
 
-			if (wiz::load_data::LoadData::LoadDataFromFile(fileName, *global, 0, 0)) {
-				m_code_run_result->ChangeValue(wxT("Load Success!"));
+			if (0 != (x = wiz::load_data::LoadData::LoadDataFromFile(fileName, *global, 0, 0))) {
+				
+				if (x == 1) {
+					encoding = Encoding::ANSI;
+				//	SetConsoleOutputCP(default_cp); // for windows
+				//	setlocale(LC_ALL, "");
+
+					m_code_run_result->ChangeValue(wxT("Load Success! file is maybe ANSI"));
+				}
+				else {
+					encoding = Encoding::UTF8;
+				//	SetConsoleOutputCP(65001); // for windows
+					//setlocale(LC_ALL, "en_US.UTF-8");
+					m_code_run_result->ChangeValue(wxT("Load Success! file is UTF-8"));
+				}
+
 			}
 			else {
 				m_code_run_result->ChangeValue(wxT("Load Failed!"));
@@ -1507,7 +1578,11 @@ protected:
 	
 	virtual void FileNewMenuOnMenuSelection(wxCommandEvent& event) {
 		if (!isMain) { return; }
-	
+		
+		encoding = Encoding::UTF8;
+		//SetConsoleOutputCP(65001); // Windows..
+		//setlocale(LC_ALL, "en_US.UTF-8");
+
 		now = nullptr;
 		global->RemoveAll();
 		now = global;
@@ -1527,7 +1602,7 @@ protected:
 
 		RefreshTable(now);
 
-		m_code_run_result->ChangeValue(wxT("New Success!"));
+		m_code_run_result->ChangeValue(wxT("New Success! : UTF-8 encoding."));
 
 		*changed = true;
 	}
@@ -1672,7 +1747,7 @@ protected:
 				dir += dir_vec[i];
 			}
 
-			dir_text->ChangeValue(wxString::FromUTF8(dir.c_str()));
+			dir_text->ChangeValue(Convert(dir));
 
 			RefreshTable(now);
 		}
@@ -2204,7 +2279,7 @@ protected:
 			dir += frame->dir_vec[i];
 		}
 
-		frame->dir_text->ChangeValue(wxString::FromUTF8(dir.c_str()));
+		frame->dir_text->ChangeValue(Convert(dir));
 
 		frame->RefreshTable(frame->now);
 
@@ -2227,7 +2302,7 @@ protected:
 			//return;
 		}
 		string mainStr = "Main = { $call = { id = main } }";
-		string eventStr(m_code->GetValue().ToUTF8());
+		string eventStr(Convert(m_code->GetValue()));
 		wiz::load_data::UserType eventUT;
 		//wiz::ExecuteData executeData;
 
@@ -2258,12 +2333,12 @@ protected:
 			//wiz::ClauText().execute_module(mainStr, now, executeData, opt, 0);
 
 			RefreshTable(now);
-			m_code_run_result->SetLabelText(wxString::FromUTF8(str.c_str()) + wxT(" run.. end.."));
+			m_code_run_result->SetLabelText(Convert(str) + wxT(" run.. end.."));
 		}
 		catch (...) {
 			RefreshTable(now);
 
-			m_code_run_result->SetLabelText(wxString::FromUTF8(str.c_str()) + wxT(" run.. failed.."));
+			m_code_run_result->SetLabelText(Convert(str) + wxT(" run.. failed.."));
 			//
 		}
 	}
@@ -2513,6 +2588,9 @@ void MainFrame::init(wxWindow* parent, wxWindowID id, const wxString& title, con
 
 	m_code_run_result = new wxTextCtrl(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 	m_code_run_result->Enable(false);
+
+	m_code_run_result->ChangeValue(wxT("UTF-8 encoding."));
+
 	bSizer5->Add(m_code_run_result, 7, wxALL, 5);
 
 	m_now_view_text = new wxStaticText(this, wxID_ANY, wxT("View Mode A"), wxDefaultPosition, wxDefaultSize, 0);
