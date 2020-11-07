@@ -59,10 +59,16 @@ public:
 
 // for @insert, @update, @delete
 inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* eventUT, const wiz::load_data::ItemType<WIZ_STRING_TYPE>& x,
-	const wiz::load_data::ItemType<WIZ_STRING_TYPE>& y, long long x_idx, const std::string& dir) {
+	wiz::load_data::ItemType<WIZ_STRING_TYPE> y, long long x_idx, const std::string& dir) {
 
 	if (y.Get() == "%any"sv) {
 		return true;
+	}
+
+	bool use_not = false;
+	if (wiz::String::startsWith(y.Get().ToString(), "!")) {
+		use_not = true;
+		y.Set(0, y.Get().ToString().substr(1));
 	}
 
 	if (wiz::String::startsWith(y.Get().ToString(), "%event_"sv)) {
@@ -90,10 +96,19 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 		statements += " } ";
 		std::string result = clautext.execute_module(" Main = { $call = { id = NONE  } } " + statements, global, executeData, option, 1);
 
+		bool success = false;
 		if (result == "TRUE"sv) {
-			return true;
+			success = true;
 		}
-		return false;
+		
+		if (use_not) {
+			return !success;
+		}
+		return success;
+	}
+
+	if (use_not) {
+		return x.Get() != y.Get();
 	}
 	return x.Get() == y.Get();
 }
