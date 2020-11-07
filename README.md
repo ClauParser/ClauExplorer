@@ -1,5 +1,6 @@
 # ClauExplorer
 Using ClauParser/ClauParser, vztpv/ClauScript, and wxWidgets.
+with UTF-8
 
 ![alt text](test.png) 
 
