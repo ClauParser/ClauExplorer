@@ -53,7 +53,7 @@ inline std::string Convert(const wxString& str) {
 		return str.ToUTF8().data();
 	}
 	else {
-		return str.To8BitData().data();
+		return str.ToStdString();
 	}
 }
 inline std::string Convert(wxString&& str) {
@@ -61,7 +61,7 @@ inline std::string Convert(wxString&& str) {
 		return str.ToUTF8().data();
 	}
 	else {
-		return str.To8BitData().data();
+		return str.ToStdString();
 	}
 }
 
@@ -1652,8 +1652,8 @@ protected:
 					encoding = Encoding::ANSI;
 				//	SetConsoleOutputCP(default_cp); // for windows
 				//	setlocale(LC_ALL, "");
-
-					m_code_run_result->ChangeValue(wxT("Load Success! file is maybe ANSI"));
+					*global = wiz::load_data::UserType();
+					m_code_run_result->ChangeValue(wxT("Load Failed! file is maybe ANSI"));
 				}
 				else {
 					encoding = Encoding::UTF8;
@@ -2417,7 +2417,7 @@ protected:
 			//return;
 		}
 		string mainStr = "Main = { $call = { id = main } }";
-		string eventStr(Convert(m_code->GetValue()));
+		string eventStr(m_code->GetValue().c_str());
 		wiz::load_data::UserType eventUT;
 		//wiz::ExecuteData executeData;
 
