@@ -256,7 +256,7 @@ bool _InsertFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data:
 			else if (x.ut->IsUserTypeList(i) && !wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
 				// chk all case exist of @.
 				// no exist -> return false;
-				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
+				if (wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "$"sv)) {
 					ut_count++;
 					count++;
 					continue;
@@ -355,7 +355,7 @@ bool _RemoveFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data:
 			else if (x.ut->IsUserTypeList(i) && !wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
 				// chk all case exist of @.
 				// no exist -> return false;
-				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
+				if (wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "$"sv)) {
 					ut_count++;
 					count++;
 					continue;
@@ -459,7 +459,7 @@ bool _UpdateFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data:
 			else if (x.ut->IsUserTypeList(i) && !wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
 				// chk all case exist of @.
 				// no exist -> return false;
-				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
+				if (wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "$"sv)) {
 					ut_count++;
 					count++;
 					continue;
@@ -592,12 +592,29 @@ bool InsertFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 				i--;
 			}
 			else if (x.ut->IsUserTypeList(i) && !wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
-				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
-					for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
-						if (_InsertFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
-							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count)
-								, x.dir + "/$ut" + std::to_string(j)
-							));
+				if (wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "$"sv)) {
+					auto temp = x.ut->GetUserTypeList(ut_count)->GetName().ToString();
+					auto name = temp.substr(1);
+
+					if (name.empty()) {
+
+						for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
+							if (_InsertFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
+								que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count)
+									, x.dir + "/$ut" + std::to_string(j)
+								));
+							}
+						}
+					}
+					else {
+
+						auto usertype = x.global->GetUserTypeItemIdx(name);
+
+						for (long long j = 0; j < usertype.size(); ++j) {
+							if (_InsertFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
+								que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count),
+									x.dir + "/$ut" + std::to_string(usertype[j])));
+							}
 						}
 					}
 				}
@@ -803,10 +820,28 @@ bool RemoveFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 				ut_count--;
 			}
 			else if (x.ut->IsUserTypeList(i) && false == wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
-				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
-					for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
-						if (_RemoveFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
-							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), x.dir + "/$ut" + std::to_string(j)));
+				if (wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "$"sv)) {
+					auto temp = x.ut->GetUserTypeList(ut_count)->GetName().ToString();
+					auto name = temp.substr(1);
+
+					if (name.empty()) {
+
+						for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
+							if (_InsertFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
+								que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count)
+									, x.dir + "/$ut" + std::to_string(j)
+								));
+							}
+						}
+					}
+					else {
+						auto usertype = x.global->GetUserTypeItemIdx(name);
+
+						for (long long j = 0; j < usertype.size(); ++j) {
+							if (_InsertFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
+								que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count),
+									x.dir + "/$ut" + std::to_string(usertype[j])));
+							}
 						}
 					}
 				}
@@ -940,11 +975,29 @@ bool UpdateFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 				}
 			}
 			else if (x.ut->IsUserTypeList(i) && !wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "@"sv)) {
-				if (x.ut->GetUserTypeList(ut_count)->GetName() == "$"sv) {
-					for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
-						if (_UpdateFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
-							que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count),
-								x.dir + "/$ut" + std::to_string(j)));
+				if (wiz::String::startsWith(x.ut->GetUserTypeList(ut_count)->GetName().ToString(), "$"sv)) {
+					auto temp = x.ut->GetUserTypeList(ut_count)->GetName().ToString();
+					auto name = temp.substr(1);
+
+					if (name.empty()) {
+
+						for (long long j = 0; j < x.global->GetUserTypeListSize(); ++j) {
+							if (_InsertFunc(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count), eventUT)) {
+								que.push(UtInfo(x.global->GetUserTypeList(j), x.ut->GetUserTypeList(ut_count)
+									, x.dir + "/$ut" + std::to_string(j)
+								));
+							}
+						}
+					}
+					else {
+
+						auto usertype = x.global->GetUserTypeItemIdx(name);
+
+						for (long long j = 0; j < usertype.size(); ++j) {
+							if (_InsertFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
+								que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count),
+									x.dir + "/$ut" + std::to_string(usertype[j])));
+							}
 						}
 					}
 				}
