@@ -120,6 +120,12 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 		return true;
 	}
 
+	bool use_not = false;
+	if (wiz::String::startsWith(y.Get().ToString(), "!")) {
+		use_not = true;
+		y.Set(0, y.Get().ToString().substr(1));
+	}
+
 	{
 		std::string name = y.GetName().ToString();
 
@@ -128,17 +134,16 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 			if (idx < 0 || idx >= global->GetItemListSize()) {
 				return false;
 			}
-			if (global->GetItemList(idx).Get() != y.Get()) {
+			if (!use_not && global->GetItemList(idx).Get() != y.Get()) {
+				return false;
+			}
+			if (use_not && global->GetItemList(idx).Get() == y.Get()) {
 				return false;
 			}
 		}
 	}
 
-	bool use_not = false;
-	if (wiz::String::startsWith(y.Get().ToString(), "!")) {
-		use_not = true;
-		y.Set(0, y.Get().ToString().substr(1));
-	}
+	
 
 	if (wiz::String::startsWith(y.Get().ToString(), "%event_"sv)) {
 		std::string event_id = y.Get().ToString().substr(7);
