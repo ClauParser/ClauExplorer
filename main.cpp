@@ -120,6 +120,20 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 		return true;
 	}
 
+	{
+		std::string name = y.GetName().ToString();
+
+		if (wiz::String::startsWith(name, "&"sv) && name.size() >= 2) {
+			long long idx = std::stoll(name.substr(1));
+			if (idx < 0 || idx >= global->GetItemListSize()) {
+				return false;
+			}
+			if (global->GetItemList(idx).Get() != y.Get()) {
+				return false;
+			}
+		}
+	}
+
 	bool use_not = false;
 	if (wiz::String::startsWith(y.Get().ToString(), "!")) {
 		use_not = true;
@@ -910,7 +924,6 @@ bool UpdateFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 						}
 						auto value = x.ut->GetItemList(it_count).Get();
 						x.global->GetItemList(idx).Set(0, value);
-						return true;
 					}
 					else {
 						x.global->SetItem(WIZ_STRING_TYPE(x.ut->GetItemList(it_count).GetName().ToString().substr(1)),
@@ -966,23 +979,51 @@ protected:
 	wxTextCtrl* m_textCtrl;
 	wxButton* m_button;
 	wiz::load_data::UserType** now;
+	int* ptr_dataViewListCtrlNo;
+	int* ptr_position;
+	int* ptr_view_mode;
+
+	wxDataViewListCtrl* m_dataViewListCtrl[4];
 
 	// Virtual event handlers, overide them in your derived class
+
 	virtual void m_buttonOnButtonClick(wxCommandEvent& event) { 
-		m_textCtrl->ChangeValue(Convert((*now)->ToStringEX())); 
+		long long  start = 0;
+
+		if (2 == *ptr_view_mode) {
+			long long sum = 0;
+			
+			for (int i = 0; i < (*ptr_dataViewListCtrlNo); ++i) {
+				sum += m_dataViewListCtrl[i]->GetItemCount();
+			}
+			sum += (*ptr_position);
+			start = sum;
+		}
+		
+		m_textCtrl->ChangeValue(Convert((*now)->ToStringEX(start))); 
 	}
 
 
 public:
 
-	TextFrame(wiz::load_data::UserType** now, wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(770, 381), long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
+	TextFrame(wiz::load_data::UserType** now, int* dataViewListCtrlNo,
+	int* position, int* view_mode, wxDataViewListCtrl* m_dataViewListCtrl1, wxDataViewListCtrl* m_dataViewListCtrl2,
+		wxDataViewListCtrl* m_dataViewListCtrl3, wxDataViewListCtrl* m_dataViewListCtrl4, wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(770, 381), long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
 
 	~TextFrame();
 
 };
 
-TextFrame::TextFrame(wiz::load_data::UserType** now, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxFrame(parent, id, title, pos, size, style)
+TextFrame::TextFrame(wiz::load_data::UserType** now, int* dataViewListCtrlNo,
+	int* position, int* view_mode, wxDataViewListCtrl* m_dataViewListCtrl1, wxDataViewListCtrl* m_dataViewListCtrl2,
+	wxDataViewListCtrl* m_dataViewListCtrl3, wxDataViewListCtrl* m_dataViewListCtrl4, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxFrame(parent, id, title, pos, size, style),
+	 ptr_dataViewListCtrlNo(dataViewListCtrlNo), ptr_position(position), ptr_view_mode(view_mode)
 {
+	m_dataViewListCtrl[0] = m_dataViewListCtrl1;
+	m_dataViewListCtrl[1] = m_dataViewListCtrl2;
+	m_dataViewListCtrl[2] = m_dataViewListCtrl3;
+	m_dataViewListCtrl[3] = m_dataViewListCtrl4;
+
 	this->now = now;
 	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
 
@@ -1004,7 +1045,19 @@ TextFrame::TextFrame(wiz::load_data::UserType** now, wxWindow* parent, wxWindowI
 	// Connect Events
 	m_button->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TextFrame::m_buttonOnButtonClick), NULL, this);
 
-	m_textCtrl->ChangeValue(Convert((*now)->ToStringEX()));
+	long long  start = 0;
+
+	if (2 == *ptr_view_mode) {
+		long long sum = 0;
+
+		for (int i = 0; i < (*ptr_dataViewListCtrlNo); ++i) {
+			sum += m_dataViewListCtrl[i]->GetItemCount();
+		}
+		sum += (*ptr_position);
+		start = sum;
+	}
+
+	m_textCtrl->ChangeValue(Convert((*now)->ToStringEX(start)));
 }
 
 TextFrame::~TextFrame()
@@ -2291,7 +2344,8 @@ protected:
 	virtual void TextMenuOnMenuSelection(wxCommandEvent& event) {
 		if (*changed) { changedEvent(); }
 
-		TextFrame* frame = new TextFrame(&this->now, this);
+		TextFrame* frame = new TextFrame(&this->now, &dataViewListCtrlNo, &position, &view_mode, m_dataViewListCtrl1, m_dataViewListCtrl2,
+			m_dataViewListCtrl3, m_dataViewListCtrl4, this);
 		
 		frame->Show(true);
 	}
