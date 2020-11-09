@@ -115,10 +115,9 @@ public:
 // for @insert, @update, @delete
 inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType* eventUT, const wiz::load_data::ItemType<WIZ_STRING_TYPE>& x,
 	wiz::load_data::ItemType<WIZ_STRING_TYPE> y, long long x_idx, const std::string& dir) {
-
-	if (y.Get() == "%any"sv) {
-		return true;
-	}
+	
+	auto x_name = x.GetName();
+	auto x_value = x.Get();
 
 	bool use_not = false;
 	if (wiz::String::startsWith(y.Get().ToString(), "!")) {
@@ -134,16 +133,20 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 			if (idx < 0 || idx >= global->GetItemListSize()) {
 				return false;
 			}
-			if (!use_not && global->GetItemList(idx).Get() != y.Get()) {
-				return false;
+
+			if (y.Get() == "%any"sv) {
+				return true;
 			}
-			if (use_not && global->GetItemList(idx).Get() == y.Get()) {
-				return false;
-			}
+
+			x_idx = idx;
+			x_name = global->GetItemList(idx).GetName();
+			x_value = global->GetItemList(idx).Get();
 		}
 	}
 
-	
+	if (y.Get() == "%any"sv) {
+		return true;
+	}
 
 	if (wiz::String::startsWith(y.Get().ToString(), "%event_"sv)) {
 		std::string event_id = y.Get().ToString().substr(7);
@@ -158,10 +161,10 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 		// do not use NONE!(in user?)
 		statements += " Event = { id = NONE  ";
 		statements += " $call = { id = " + event_id + " ";
-		statements += " name = " + x.GetName().ToString() + " ";
-		statements += " value = " + y.Get().ToString() + " ";
+		statements += " name = " + x_name.ToString() + " ";
+		statements += " value = " + x_value.ToString() + " ";
 		statements += " is_user_type = FALSE ";
-		statements += " real_dir =  " + wiz::load_data::LoadData::GetRealDir(dir, global) + " ";
+		//statements += " real_dir =  " + wiz::load_data::LoadData::GetRealDir(dir, global) + " ";
 		statements += " relative_dir = " + dir + " ";
 		statements += " idx = " + std::to_string(x_idx) + " "; // removal?
 		statements += " } ";
@@ -182,9 +185,9 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 	}
 
 	if (use_not) {
-		return x.Get() != y.Get();
+		return x_value != y.Get();
 	}
-	return x.Get() == y.Get();
+	return x_value == y.Get();
 }
 
 
@@ -560,7 +563,7 @@ bool InsertFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 					// do not use NONE!(in user?)
 					statements += " Event = { id = NONE  ";
 					statements += " $call = { id = " + event_id + " ";
-					statements += " name = EMPTY_STRING ";
+					statements += " name =  " + x.ut->GetItemList(it_count).GetName().ToString() + " ";
 					statements += " is_user_type = FALSE ";
 					statements += " } ";
 
