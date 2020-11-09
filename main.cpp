@@ -161,7 +161,7 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 		// do not use NONE!(in user?)
 		statements += " Event = { id = NONE  ";
 		statements += " $call = { id = " + event_id + " ";
-		statements += " name = " + x_name.ToString() + " ";
+		statements += " name = " + x_name.ToString().empty()? "EMPTY_NAME" : x_name.ToString() + " ";
 		statements += " value = " + x_value.ToString() + " ";
 		statements += " is_user_type = FALSE ";
 		//statements += " real_dir =  " + wiz::load_data::LoadData::GetRealDir(dir, global) + " ";
@@ -605,10 +605,10 @@ bool InsertFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 					auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
 
 					for (long long j = 0; j < usertype.size(); ++j) {
-						if (_InsertFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
+						//if (_InsertFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
 							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count),
 								x.dir + "/$ut" + std::to_string(usertype[j])));
-						}
+						//}
 					}
 				}
 				ut_count++;
@@ -814,10 +814,10 @@ bool RemoveFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 					auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
 
 					for (long long j = 0; j < usertype.size(); ++j) {
-						if (_RemoveFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
+						//if (_RemoveFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
 							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count),
 								x.dir + "/$ut" + std::to_string(usertype[j])));
-						}
+						//}
 					}
 				}
 
@@ -952,10 +952,10 @@ bool UpdateFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 					auto usertype = x.global->GetUserTypeItemIdx(x.ut->GetUserTypeList(ut_count)->GetName().ToString());
 
 					for (long long j = 0; j < usertype.size(); ++j) {
-						if (_UpdateFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
+						//if (_UpdateFunc(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count), eventUT)) {
 							que.push(UtInfo(x.global->GetUserTypeList(usertype[j]), x.ut->GetUserTypeList(ut_count),
 								x.dir + "/$ut" + std::to_string(usertype[j])));
-						}
+					//	}
 					}
 				}
 			}
