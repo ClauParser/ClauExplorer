@@ -135,7 +135,7 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 			}
 
 			if (y.Get() == "%any"sv) {
-				return true;
+				return !use_not;
 			}
 
 			x_idx = idx;
@@ -145,7 +145,7 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 	}
 
 	if (y.Get() == "%any"sv) {
-		return true;
+		return !use_not;
 	}
 
 	if (wiz::String::startsWith(y.Get().ToString(), "%event_"sv)) {
@@ -334,6 +334,9 @@ bool _RemoveFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data:
 				auto item = x.global->GetItemIdx(x.ut->GetItemList(it_count).GetName().ToString());
 				// no exist -> return false;
 				if (item.empty()) {
+					if (x.ut->GetItemList(it_count).Get() == "!%any") {
+						return true;
+					}
 					// LOG....
 					return false;
 				}
@@ -1637,6 +1640,7 @@ protected:
 	virtual void FileLoadMenuOnMenuSelection(wxCommandEvent& event) {
 		if (!isMain) { return; }
 		wxFileDialog* openFileDialog = new wxFileDialog(this);
+		static int count = 0;
 
 		if (openFileDialog->ShowModal() == wxID_OK) {
 			wxString _fileName = openFileDialog->GetPath();
@@ -1646,6 +1650,8 @@ protected:
 			
 			int x = 0;
 
+			count++;
+
 			if (0 != (x = wiz::load_data::LoadData::LoadDataFromFile(fileName, *global, 0, 0))) {
 				
 				if (x == 1) {
@@ -1653,18 +1659,21 @@ protected:
 				//	SetConsoleOutputCP(default_cp); // for windows
 				//	setlocale(LC_ALL, "");
 					*global = wiz::load_data::UserType();
-					m_code_run_result->ChangeValue(wxT("Load Failed! file is maybe ANSI"));
+					std::string temp = std::to_string(count);
+					m_code_run_result->ChangeValue(wxString::FromUTF8(temp.c_str()) + wxT("Load Failed! file is maybe ANSI"));
 				}
 				else {
 					encoding = Encoding::UTF8;
 				//	SetConsoleOutputCP(65001); // for windows
 					//setlocale(LC_ALL, "en_US.UTF-8");
-					m_code_run_result->ChangeValue(wxT("Load Success! file is UTF-8"));
+					std::string temp = std::to_string(count);
+					m_code_run_result->ChangeValue(wxString::FromUTF8(temp.c_str()) +  wxT("Load Success! file is UTF-8"));
 				}
 
 			}
 			else {
-				m_code_run_result->ChangeValue(wxT("Load Failed!"));
+				std::string temp = std::to_string(count);
+				m_code_run_result->ChangeValue(wxString::FromUTF8(temp.c_str()) + wxT("Load Failed!"));
 			}
 			now = global;
 
@@ -2417,7 +2426,7 @@ protected:
 			//return;
 		}
 		string mainStr = "Main = { $call = { id = main } }";
-		string eventStr(m_code->GetValue().c_str());
+		string eventStr(m_code->GetValue().ToUTF8());
 		wiz::load_data::UserType eventUT;
 		//wiz::ExecuteData executeData;
 
@@ -2630,8 +2639,8 @@ void MainFrame::init(wxWindow* parent, wxWindowID id, const wxString& title, con
 	bSizer6 = new wxBoxSizer(wxVERTICAL);
 
 	m_code = new wxStyledTextCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, wxEmptyString);
-	m_code->SetText(wxT(
-		"#ClauExplorer (https://github.com/ClauParser/ClauExplorer) \n#		제작자 vztpv@naver.com"));
+	m_code->SetText(wxString(wxT(
+		"#ClauExplorer (https://github.com/ClauParser/ClauExplorer) \n#		제작자 vztpv@naver.com"), wxConvUTF8));
 	m_code->SetUseTabs(true);
 	m_code->SetTabWidth(4);
 	m_code->SetIndent(4);
