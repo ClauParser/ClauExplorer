@@ -2430,7 +2430,7 @@ protected:
 		wiz::load_data::UserType eventUT;
 		//wiz::ExecuteData executeData;
 
-		wiz::load_data::LoadData::LoadDataFromString(eventStr, eventUT);
+		wiz::load_data::LoadData::LoadDataFromString2(eventStr, eventUT);
 
 		//executeData.pEvents = &eventUT;
 		//executeData.noUseInput = true;
