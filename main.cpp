@@ -2,7 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #ifdef _DEBUG
-#include <vld.h>
+//#include <vld.h>
 #endif
 
 #include <string>
@@ -18,6 +18,7 @@
 //
 //
 #include <Windows.h>
+
 #include <wx/wx.h>
 
 #include <wx/defs.h>
@@ -154,6 +155,8 @@ inline bool EqualFunc(wiz::load_data::UserType* global, wiz::load_data::UserType
 		wiz::ClauText clautext;
 		wiz::ExecuteData executeData;
 		executeData.pEvents = eventUT;
+		executeData.noUseInput = true;
+		executeData.noUseOutput = true;
 		wiz::Option option;
 
 		std::string statements;
@@ -528,7 +531,9 @@ bool InsertFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 
 					wiz::ClauText clautext;
 					wiz::ExecuteData executeData;
-					executeData.pEvents = insert_ut->GetParent();
+					executeData.pEvents = eventUT;
+					executeData.noUseInput = true;
+					executeData.noUseOutput = true;
 					wiz::Option option;
 
 					std::string statements;
@@ -558,7 +563,9 @@ bool InsertFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 
 					wiz::ClauText clautext;
 					wiz::ExecuteData executeData;
-					executeData.pEvents = insert_ut->GetParent();
+					executeData.pEvents = eventUT;
+					executeData.noUseInput = true;
+					executeData.noUseOutput = true;
 					wiz::Option option;
 
 					std::string statements;
@@ -675,7 +682,9 @@ bool RemoveFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 
 					wiz::ClauText clautext;
 					wiz::ExecuteData executeData;
-					executeData.pEvents = insert_ut->GetParent();
+					executeData.pEvents = eventUT;
+					executeData.noUseInput = true;
+					executeData.noUseOutput = true;
 					wiz::Option option;
 
 					wiz::load_data::UserType callUT;
@@ -730,7 +739,9 @@ bool RemoveFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 
 					wiz::ClauText clautext;
 					wiz::ExecuteData executeData;
-					executeData.pEvents = insert_ut->GetParent();
+					executeData.pEvents = eventUT;
+					executeData.noUseInput = true;
+					executeData.noUseOutput = true;
 					wiz::Option option;
 					wiz::load_data::UserType callUT;
 					std::string statements;
@@ -906,7 +917,9 @@ bool UpdateFunc(wiz::SmartPtr<wiz::load_data::UserType> global, wiz::load_data::
 
 					wiz::ClauText clautext;
 					wiz::ExecuteData executeData;
-					executeData.pEvents = insert_ut->GetParent();
+					executeData.pEvents = eventUT;
+					executeData.noUseInput = true;
+					executeData.noUseOutput = true;
 					wiz::Option option;
 
 					wiz::load_data::UserType callUT;
@@ -2640,7 +2653,7 @@ void MainFrame::init(wxWindow* parent, wxWindowID id, const wxString& title, con
 
 	m_code = new wxStyledTextCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, wxEmptyString);
 	m_code->SetText(wxString(wxT(
-		"#ClauExplorer (https://github.com/ClauParser/ClauExplorer) \n#		제작자 vztpv@naver.com"), wxConvUTF8));
+		"#ClauExplorer (https://github.com/ClauParser/ClauExplorer) \n#		제작자 vztpv@naver.com\n"), wxConvUTF8));
 	m_code->SetUseTabs(true);
 	m_code->SetTabWidth(4);
 	m_code->SetIndent(4);
