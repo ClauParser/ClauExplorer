@@ -1,5 +1,4 @@
 
-
 #ifndef SMART_PTR_H
 #define SMART_PTR_H
 
@@ -73,8 +72,8 @@ namespace wiz {
             return;
         }
     public:
-        
-            SmartPtr(T* ptr = nullptr)
+
+        SmartPtr(T* ptr = nullptr)
             : option(0)
         {
             // ptr <- new T(~~);
@@ -84,8 +83,8 @@ namespace wiz {
                 this->inner->count = 1;
             }
         }
-        
-            SmartPtr(T* ptr, const int option) // option 1,2,..
+
+        SmartPtr(T* ptr, const int option) // option 1,2,..
             : option(option)
         {
             // ptr <- new T(~~);
@@ -112,10 +111,11 @@ namespace wiz {
             if (isOnlyOne())
             {
                 remove(false);
+                quit();
             }
             else
             {
-                remove(false);
+               remove(false);
             }
         }
     public:
@@ -128,7 +128,7 @@ namespace wiz {
                 inner->ptr = ptr;
                 inner->count = 1;
             }
-            return* this;
+            return*this;
         }
         SmartPtr<T>& operator=(const SmartPtr<T>& _sp)
         {
@@ -184,7 +184,7 @@ namespace wiz {
             return true;
         }
     public:
-        operator T*() {
+        operator T* () {
             if (this->inner) {
                 return this->inner->ptr;
             }
@@ -219,4 +219,3 @@ namespace wiz {
 }
 
 #endif
-
